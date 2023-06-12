@@ -1,18 +1,38 @@
 import { NestFactory } from '@nestjs/core';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
-
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
+import { HttpExceptionFilter } from './exception.filter';
+import * as cookieParser from 'cookie-parser';
+import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter({ logger: true }),
+  const app = await NestFactory.create(AppModule);
+  const config = new DocumentBuilder()
+    .setTitle('Flashcards')
+    .setDescription('The config API description')
+    .setVersion('1.0')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('docs', app, document);
+  app.useGlobalPipes(
+    new ValidationPipe({
+      stopAtFirstError: false,
+      exceptionFactory: (errors) => {
+        const customErrors = errors.map((e) => {
+          const firstError = JSON.stringify(e.constraints);
+          return { field: e.property, message: firstError };
+        });
+        throw new BadRequestException(customErrors);
+      },
+    }),
   );
-  app.useGlobalPipes(new ValidationPipe({}));
-  await app.listen(3000, '0.0.0.0');
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.use(cookieParser());
+  await app.listen(process.env.PORT || 3000);
 }
-
-void bootstrap();
+try {
+  bootstrap();
+} catch (e) {
+  console.log('BOOTSTRAP CALL FAILED');
+  console.log('ERROR: ');
+  console.log(e);
+}

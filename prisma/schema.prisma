@@ -5,7 +5,20 @@ datasource db {
 }
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "fullTextIndex"]
+}
+
+model Verification {
+  id                      String    @id @default(cuid())
+  userId                  String    @unique
+  isEmailVerified         Boolean   @default(false)
+  verificationToken       String?   @unique @default(uuid())
+  verificationTokenExpiry DateTime?
+  verificationEmailsSent  Int       @default(0)
+  user                    User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model User {
@@ -14,17 +27,41 @@ model User {
   password            String
   isAdmin             Boolean              @default(false)
   name                String               @db.VarChar(40)
-  isVerified          Boolean              @default(false)
   avatar              String?
   deckCount           Int                  @default(0)
   isDeleted           Boolean?             @default(false)
   deleteTime          Int?
   created             DateTime             @default(now())
   updated             DateTime             @updatedAt
-  cards               Card[] // One-to-many relation
-  decks               Deck[] // One-to-many relation
-  grades              Grade[] // One-to-many relation
-  generalChatMessages GeneralChatMessage[] // One-to-many relation
+  cards               Card[]
+  decks               Deck[]
+  grades              Grade[]
+  generalChatMessages GeneralChatMessage[]
+  verification        Verification?
+  AccessToken         AccessToken[]
+  RefreshToken        RefreshToken[]
+}
+
+model AccessToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  isRevoked Boolean  @default(false)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model Card {
