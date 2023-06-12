@@ -1,23 +1,19 @@
-import {
-  BadRequestException,
-  INestApplication,
-  ValidationPipe,
-} from '@nestjs/common';
-import { ValidationError } from 'class-validator';
+import { BadRequestException, INestApplication, ValidationPipe } from '@nestjs/common'
+import { ValidationError } from 'class-validator'
 
 export const validationErrorsMapper = {
   mapValidationErrorArrayToValidationPipeErrorTypeArray(
-    errors: ValidationError[],
+    errors: ValidationError[]
   ): ValidationPipeErrorType[] {
-    return errors.flatMap((error) => {
-      const constraints = error.constraints ?? [];
+    return errors.flatMap(error => {
+      const constraints = error.constraints ?? []
       return Object.entries(constraints).map(([_, value]) => ({
         field: error.property,
         message: value,
-      }));
-    });
+      }))
+    })
   },
-};
+}
 
 export function pipesSetup(app: INestApplication) {
   app.useGlobalPipes(
@@ -28,16 +24,14 @@ export function pipesSetup(app: INestApplication) {
       stopAtFirstError: true,
       exceptionFactory: (errors: ValidationError[]) => {
         const err =
-          validationErrorsMapper.mapValidationErrorArrayToValidationPipeErrorTypeArray(
-            errors,
-          );
-        throw new BadRequestException(err);
+          validationErrorsMapper.mapValidationErrorArrayToValidationPipeErrorTypeArray(errors)
+        throw new BadRequestException(err)
       },
-    }),
-  );
+    })
+  )
 }
 
 export type ValidationPipeErrorType = {
-  field: string;
-  message: string;
-};
+  field: string
+  message: string
+}

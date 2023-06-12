@@ -1,34 +1,34 @@
-import { Injectable } from '@nestjs/common';
-import { isAfter } from 'date-fns';
-import * as jwt from 'jsonwebtoken';
-import * as bcrypt from 'bcrypt';
-import { UsersRepository } from '../users/infrastructure/users.repository';
-import * as process from 'process';
+import { Injectable } from '@nestjs/common'
+import { isAfter } from 'date-fns'
+import * as jwt from 'jsonwebtoken'
+import * as bcrypt from 'bcrypt'
+import { UsersRepository } from '../users/infrastructure/users.repository'
+import * as process from 'process'
 
 @Injectable()
 export class AuthService {
   constructor(private usersRepository: UsersRepository) {}
 
   createJwtTokensPair(userId: string, email: string | null) {
-    const accessSecretKey = process.env.ACCESS_JWT_SECRET_KEY;
-    const refreshSecretKey = process.env.REFRESH_JWT_SECRET_KEY;
+    const accessSecretKey = process.env.ACCESS_JWT_SECRET_KEY
+    const refreshSecretKey = process.env.REFRESH_JWT_SECRET_KEY
     const payload: { userId: string; date: Date; email: string | null } = {
       userId,
       date: new Date(),
       email,
-    };
-    const accessToken = jwt.sign(payload, accessSecretKey, { expiresIn: '1d' });
+    }
+    const accessToken = jwt.sign(payload, accessSecretKey, { expiresIn: '1d' })
     const refreshToken = jwt.sign(payload, refreshSecretKey, {
       expiresIn: '30d',
-    });
+    })
     return {
       accessToken,
       refreshToken,
-    };
+    }
   }
 
   async checkCredentials(email: string, password: string) {
-    const user = await this.usersRepository.findUserByEmail(email);
+    const user = await this.usersRepository.findUserByEmail(email)
     if (!user /*|| !user.emailConfirmation.isConfirmed*/)
       return {
         resultCode: 1,
@@ -36,11 +36,8 @@ export class AuthService {
           accessToken: null,
           refreshToken: null,
         },
-      };
-    const isPasswordValid = await this.isPasswordCorrect(
-      password,
-      user.password,
-    );
+      }
+    const isPasswordValid = await this.isPasswordCorrect(password, user.password)
     if (!isPasswordValid) {
       return {
         resultCode: 1,
@@ -50,39 +47,37 @@ export class AuthService {
             refreshToken: null,
           },
         },
-      };
+      }
     }
-    const tokensPair = this.createJwtTokensPair(user.id, user.email);
+    const tokensPair = this.createJwtTokensPair(user.id, user.email)
     return {
       resultCode: 0,
       data: tokensPair,
-    };
+    }
   }
 
   private async isPasswordCorrect(password: string, hash: string) {
-    return bcrypt.compare(password, hash);
+    return bcrypt.compare(password, hash)
   }
 
   async confirmEmail(token: string): Promise<boolean> {
-    const user = await this.usersRepository.findUserByVerificationToken(token);
-    if (!user || user.isEmailVerified) return false;
-    const dbToken = user.verificationToken;
-    const isTokenExpired = isAfter(user.verificationTokenExpiry, new Date());
+    const user = await this.usersRepository.findUserByVerificationToken(token)
+    if (!user || user.isEmailVerified) return false
+    const dbToken = user.verificationToken
+    const isTokenExpired = isAfter(user.verificationTokenExpiry, new Date())
     if (dbToken !== token || isTokenExpired) {
-      return false;
+      return false
     }
 
-    return await this.usersRepository.updateConfirmation(user.id);
+    return await this.usersRepository.updateConfirmation(user.id)
   }
 
   async resendCode(email: string) {
-    const user = await this.usersRepository.findUserByEmail(email);
-    if (!user || user?.verification.isEmailVerified) return null;
-    const updatedUser = await this.usersRepository.updateVerificationToken(
-      user.id,
-    );
-    if (!updatedUser) return null;
+    const user = await this.usersRepository.findUserByEmail(email)
+    if (!user || user?.verification.isEmailVerified) return null
+    const updatedUser = await this.usersRepository.updateVerificationToken(user.id)
+    if (!updatedUser) return null
 
-    return true;
+    return true
   }
 }

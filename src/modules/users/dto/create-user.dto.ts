@@ -1,10 +1,10 @@
-import { Length, Matches } from 'class-validator';
+import { Length, Matches } from 'class-validator'
 
 export class CreateUserDto {
   @Length(3, 10)
-  login: string;
+  login: string
   @Length(6, 20)
-  password: string;
+  password: string
   @Matches(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/)
-  email: string;
+  email: string
 }
