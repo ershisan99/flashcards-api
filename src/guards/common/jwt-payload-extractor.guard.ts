@@ -6,6 +6,7 @@ export class JwtPayloadExtractorGuard extends AuthGuard('payloadExtractor') {
   canActivate(context: ExecutionContext) {
     // Add your custom authentication logic here
     // for example, call super.logIn(request) to establish a session.
+    console.log('JwtPayloadExtractorGuard')
     return super.canActivate(context)
   }
 

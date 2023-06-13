@@ -44,7 +44,6 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('sign-in')
   async login(@Request() req, @Res({ passthrough: true }) res) {
-    console.log(req)
     const userData = req.user.data
     res.cookie('refreshToken', userData.refreshToken, {
       httpOnly: true,
@@ -96,10 +95,12 @@ export class AuthController {
   async refreshToken(@Request() req, @Response() res) {
     if (!req.cookie?.refreshToken) throw new UnauthorizedException()
     const userId = req.user.id
-    const newTokens = this.authService.createJwtTokensPair(userId, null)
+    const newTokens = await this.authService.createJwtTokensPair(userId)
     res.cookie('refreshToken', newTokens.refreshToken, {
       httpOnly: true,
       secure: true,
+      path: '/refresh',
+      expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
     })
     return { accessToken: newTokens.accessToken }
   }

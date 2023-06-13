@@ -38,18 +38,17 @@ model User {
   grades              Grade[]
   generalChatMessages GeneralChatMessage[]
   verification        Verification?
-  AccessToken         AccessToken[]
+  RevokedToken        RevokedToken[]
   RefreshToken        RefreshToken[]
 
   @@fulltext([name, email])
 }
 
-model AccessToken {
+model RevokedToken {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique
-  expiresAt DateTime
-  isRevoked Boolean  @default(false)
+  revokedAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
@@ -58,7 +57,7 @@ model AccessToken {
 model RefreshToken {
   id        String   @id @default(cuid())
   userId    String
-  token     String   @unique
+  token     String   @unique @db.VarChar(255)
   expiresAt DateTime
   isRevoked Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id])

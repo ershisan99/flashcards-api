@@ -152,12 +152,10 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async revokeToken(id: string, token: string): Promise<User | null> {
-    const revokedToken = await this.prisma.accessToken.update({
-      where: {
-        token: token,
-      },
+    const revokedToken = await this.prisma.revokedToken.create({
       data: {
-        isRevoked: true,
+        token: token,
+        userId: id,
       },
       include: {
         user: true,

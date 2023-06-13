@@ -12,8 +12,8 @@ import * as process from 'process'
 @Module({
   imports: [
     ConfigModule,
-    AuthModule,
     UsersModule,
+    AuthModule,
     PrismaModule,
 
     MailerModule.forRoot({
