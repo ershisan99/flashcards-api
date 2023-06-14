@@ -26,6 +26,7 @@ model User {
   email               String               @unique
   password            String
   isAdmin             Boolean              @default(false)
+  isEmailVerified     Boolean              @default(false)
   name                String               @db.VarChar(40)
   avatar              String?
   deckCount           Int                  @default(0)
@@ -49,7 +50,7 @@ model RevokedToken {
   userId    String
   token     String   @unique
   revokedAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -60,7 +61,7 @@ model RefreshToken {
   token     String   @unique @db.VarChar(255)
   expiresAt DateTime
   isRevoked Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
@@ -83,8 +84,8 @@ model Card {
   moreId        String?
   created       DateTime @default(now())
   updated       DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id])
-  decks         Deck     @relation(fields: [deckId], references: [id])
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decks         Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
   grades        Grade[] // One-to-many relation
 
   @@index([userId])

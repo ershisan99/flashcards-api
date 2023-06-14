@@ -80,6 +80,9 @@ dependencies:
   reflect-metadata:
     specifier: ^0.1.13
     version: 0.1.13
+  remeda:
+    specifier: ^1.19.0
+    version: 1.19.0
   rxjs:
     specifier: ^7.8.1
     version: 7.8.1
@@ -6949,6 +6952,10 @@ packages:
   /relateurl@0.2.7:
     resolution: {integrity: sha512-G08Dxvm4iDN3MLM0EsP62EDV9IuhXPR6blNz6Utcp7zyV3tr4HVNINt6MpaRWbxoOHT3Q7YN2P+jaHX8vUbgog==}
     engines: {node: '>= 0.10'}
+    dev: false
+
+  /remeda@1.19.0:
+    resolution: {integrity: sha512-iwZohiXDhC1K+adRI6OB+tYxOfXyX7DaPXQDZrR5s1k7umrkG3Yd2+QDfSrYFlC7oc0IqeUns6RqSjNkERXeLw==}
     dev: false
 
   /remote-content@3.0.1:

@@ -1,5 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
-import { addDays, isAfter } from 'date-fns'
+import { addDays, isBefore } from 'date-fns'
 import * as jwt from 'jsonwebtoken'
 import * as bcrypt from 'bcrypt'
 import { UsersRepository } from '../users/infrastructure/users.repository'
@@ -56,7 +56,6 @@ export class AuthService {
         isRevoked: false,
       },
     })
-
     return {
       accessToken,
       refreshToken,
@@ -133,19 +132,21 @@ export class AuthService {
   }
 
   async confirmEmail(token: string): Promise<boolean> {
-    const user = await this.usersRepository.findUserByVerificationToken(token)
-    if (!user || user.isEmailVerified) return false
-    const dbToken = user.verificationToken
-    const isTokenExpired = isAfter(user.verificationTokenExpiry, new Date())
+    const verificationWithUser = await this.usersRepository.findUserByVerificationToken(token)
+    console.log(verificationWithUser)
+    if (!verificationWithUser || verificationWithUser.isEmailVerified) return false
+    const dbToken = verificationWithUser.verificationToken
+    const isTokenExpired = isBefore(verificationWithUser.verificationTokenExpiry, new Date())
+    console.log({ isTokenExpired })
     if (dbToken !== token || isTokenExpired) {
       return false
     }
 
-    return await this.usersRepository.updateConfirmation(user.id)
+    return await this.usersRepository.updateConfirmation(verificationWithUser.userId)
   }
 
-  async resendCode(email: string) {
-    const user = await this.usersRepository.findUserByEmail(email)
+  async resendCode(userId: string) {
+    const user = await this.usersRepository.findUserById(userId)
     if (!user || user?.verification.isEmailVerified) return null
     const updatedUser = await this.usersRepository.updateVerificationToken(user.id)
     if (!updatedUser) return null

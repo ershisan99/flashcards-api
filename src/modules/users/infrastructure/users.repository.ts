@@ -10,7 +10,8 @@ import { addHours } from 'date-fns'
 import { IUsersRepository } from '../services/users.service'
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaService } from '../../../prisma.service'
-
+import { pick } from 'remeda'
+import { Prisma } from '@prisma/client'
 @Injectable()
 export class UsersRepository implements IUsersRepository {
   constructor(private prisma: PrismaService) {}
@@ -38,14 +39,8 @@ export class UsersRepository implements IUsersRepository {
       }),
     ])
 
-    console.log(users, 'usersFromBase')
     const totalPages = Math.ceil(totalItems / itemsPerPage)
-    const usersView = users.map(u => ({
-      id: u.id,
-      name: u.name,
-      email: u.email,
-    }))
-    console.log(usersView, 'users---')
+    const usersView = users.map(u => pick(u, ['id', 'name', 'email', 'isEmailVerified']))
     return {
       totalPages,
       currentPage,
@@ -56,6 +51,7 @@ export class UsersRepository implements IUsersRepository {
   }
 
   async createUser(newUser: CreateUserInput): Promise<User | null> {
+    console.log(newUser)
     return await this.prisma.user.create({
       data: {
         email: newUser.email,
@@ -88,13 +84,16 @@ export class UsersRepository implements IUsersRepository {
     return result.count > 0
   }
 
-  async findUserById(id: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({ where: { id } })
+  async findUserById(id: string, include?: Prisma.UserInclude) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+      include,
+    })
     if (!user) {
       return null
     }
 
-    return user
+    return user as Prisma.UserGetPayload<{ include: typeof include }>
   }
 
   async findUserByEmail(email: string): Promise<User | null> {
