@@ -1,6 +1,4 @@
-import { CreateUserInput, EntityWithPaginationType, User, UserViewType } from '../../../types/types'
 import { Injectable } from '@nestjs/common'
-import jwt from 'jsonwebtoken'
 import { UsersRepository } from '../infrastructure/users.repository'
 import * as bcrypt from 'bcrypt'
 import { MailerService } from '@nestjs-modules/mailer'
