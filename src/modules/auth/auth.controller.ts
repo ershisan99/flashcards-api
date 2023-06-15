@@ -1,46 +1,41 @@
 import {
+  Body,
   Controller,
   Get,
-  Post,
-  Body,
-  UseGuards,
-  Request,
-  Response,
-  NotFoundException,
-  UnauthorizedException,
-  BadRequestException,
-  Res,
   HttpCode,
   HttpStatus,
+  Post,
+  Request,
+  Res,
+  Response,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common'
-import { AuthService } from './auth.service'
 import { RegistrationDto } from './dto/registration.dto'
 import { LocalAuthGuard } from './guards/local-auth.guard'
-import { UsersService } from '../users/services/users.service'
 import { JwtAuthGuard } from './guards/jwt-auth.guard'
 import { Response as ExpressResponse } from 'express'
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
 import { Cookies } from '../../infrastructure/decorators/cookie.decorator'
+import { CommandBus } from '@nestjs/cqrs'
+import {
+  CreateUserCommand,
+  GetCurrentUserDataCommand,
+  LogoutCommand,
+  RefreshTokenCommand,
+  ResendVerificationEmailCommand,
+  VerifyEmailCommand,
+} from './use-cases'
+
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly usersService: UsersService
-  ) {}
+  constructor(private commandBus: CommandBus) {}
 
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getUserData(@Request() req) {
     const userId = req.user.id
-    const user = await this.usersService.getUserById(userId)
-
-    if (!user) throw new UnauthorizedException()
-
-    return {
-      email: user.email,
-      name: user.name,
-      id: user.id,
-    }
+    return await this.commandBus.execute(new GetCurrentUserDataCommand(userId))
   }
 
   @HttpCode(200)
@@ -59,32 +54,18 @@ export class AuthController {
   @HttpCode(201)
   @Post('sign-up')
   async registration(@Body() registrationData: RegistrationDto) {
-    return await this.usersService.createUser(
-      registrationData.name,
-      registrationData.password,
-      registrationData.email
-    )
+    return await this.commandBus.execute(new CreateUserCommand(registrationData))
   }
 
   @HttpCode(HttpStatus.OK)
   @Post('verify-email')
   async confirmRegistration(@Body('code') confirmationCode) {
-    const result = await this.authService.confirmEmail(confirmationCode)
-    if (!result) {
-      throw new NotFoundException()
-    }
-    return null
+    return await this.commandBus.execute(new VerifyEmailCommand(confirmationCode))
   }
 
   @Post('resend-verification-email')
-  async resendRegistrationEmail(@Body('userId') userId: string) {
-    const isResent = await this.authService.resendCode(userId)
-    if (!isResent)
-      throw new BadRequestException({
-        message: 'Email already confirmed or such email was not found',
-        field: 'email',
-      })
-    return null
+  async resendVerificationEmail(@Body('userId') userId: string) {
+    return await this.commandBus.execute(new ResendVerificationEmailCommand(userId))
   }
 
   @UseGuards(JwtAuthGuard)
@@ -94,7 +75,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: ExpressResponse
   ) {
     if (!refreshToken) throw new UnauthorizedException()
-    await this.usersService.addRevokedToken(refreshToken)
+    await this.commandBus.execute(new LogoutCommand(refreshToken))
     res.clearCookie('refreshToken')
     return null
   }
@@ -105,7 +86,7 @@ export class AuthController {
   async refreshToken(@Request() req, @Response({ passthrough: true }) res: ExpressResponse) {
     if (!req.cookies?.refreshToken) throw new UnauthorizedException()
     const userId = req.user.id
-    const newTokens = await this.authService.createJwtTokensPair(userId)
+    const newTokens = await this.commandBus.execute(new RefreshTokenCommand(userId))
     res.cookie('refreshToken', newTokens.refreshToken, {
       httpOnly: true,
       // secure: true,

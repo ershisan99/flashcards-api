@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { BadRequestException, ValidationPipe } from '@nestjs/common'
+import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common'
 import { HttpExceptionFilter } from './exception.filter'
 import * as cookieParser from 'cookie-parser'
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
@@ -30,6 +30,8 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter())
   app.use(cookieParser())
   await app.listen(process.env.PORT || 3000)
+  const logger = new Logger('NestApplication')
+  logger.log(`Application is running on: ${await app.getUrl()}`)
 }
 
 try {

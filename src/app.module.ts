@@ -7,9 +7,11 @@ import { PrismaModule } from './prisma.module'
 import { MailerModule } from '@nestjs-modules/mailer'
 import * as process from 'process'
 import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strategy'
+import { CqrsModule } from '@nestjs/cqrs'
 
 @Module({
   imports: [
+    CqrsModule,
     ConfigModule,
     UsersModule,
     AuthModule,
@@ -29,6 +31,6 @@ import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strate
   ],
   controllers: [],
   providers: [JwtStrategy, JwtRefreshStrategy],
-  exports: [],
+  exports: [CqrsModule],
 })
 export class AppModule {}

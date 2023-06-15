@@ -13,10 +13,12 @@ import { UsersService } from '../services/users.service'
 import { CreateUserDto } from '../dto/create-user.dto'
 import { Pagination } from '../../../infrastructure/common/pagination.service'
 import { BaseAuthGuard } from '../../auth/guards/base-auth.guard'
+import { CommandBus } from '@nestjs/cqrs'
+import { CreateUserCommand } from '../../auth/use-cases'
 
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService) {}
+  constructor(private usersService: UsersService, private commandBus: CommandBus) {}
 
   @Get()
   async findAll(@Query() query) {
@@ -29,10 +31,12 @@ export class UsersController {
   //@UseGuards(BaseAuthGuard)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    return await this.usersService.createUser(
-      createUserDto.login,
-      createUserDto.password,
-      createUserDto.email
+    return await this.commandBus.execute(
+      new CreateUserCommand({
+        name: createUserDto.name,
+        email: createUserDto.email,
+        password: createUserDto.password,
+      })
     )
   }
 

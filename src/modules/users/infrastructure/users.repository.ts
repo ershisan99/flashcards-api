@@ -7,13 +7,13 @@ import {
 } from '../../../types/types'
 import { Injectable } from '@nestjs/common'
 import { addHours } from 'date-fns'
-import { IUsersRepository } from '../services/users.service'
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaService } from '../../../prisma.service'
 import { pick } from 'remeda'
 import { Prisma } from '@prisma/client'
+
 @Injectable()
-export class UsersRepository implements IUsersRepository {
+export class UsersRepository {
   constructor(private prisma: PrismaService) {}
 
   async getUsers(
@@ -123,13 +123,18 @@ export class UsersRepository implements IUsersRepository {
     return verification
   }
 
-  async updateConfirmation(id: string) {
+  async updateEmailVerification(id: string) {
     const result = await this.prisma.verification.update({
       where: {
         userId: id,
       },
       data: {
         isEmailVerified: true,
+        user: {
+          update: {
+            isEmailVerified: true,
+          },
+        },
       },
     })
     return result.isEmailVerified
