@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { AuthRepository } from '../infrastructure/auth.repository'
-import jwt from 'jsonwebtoken'
+import * as jwt from 'jsonwebtoken'
 import { addDays } from 'date-fns'
 
 export class RefreshTokenCommand {
