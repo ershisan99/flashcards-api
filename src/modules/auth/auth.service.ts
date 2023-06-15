@@ -21,8 +21,6 @@ export class AuthService {
     const refreshToken = jwt.sign(payload, refreshSecretKey, {
       expiresIn: '30d',
     })
-    console.log(refreshToken.length)
-    // Save refresh token in the database
     await this.prisma.refreshToken.create({
       data: {
         userId: userId,

@@ -18,10 +18,11 @@ export class ResendVerificationEmailHandler
 
   async execute(command: ResendVerificationEmailCommand) {
     const user = await this.usersRepository.findUserById(command.userId)
-    console.log(user)
+
     if (!user) {
       throw new NotFoundException('User not found')
     }
+
     if (user.isEmailVerified) {
       throw new BadRequestException('Email has already been verified')
     }

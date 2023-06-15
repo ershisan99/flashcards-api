@@ -6,14 +6,13 @@ import { AppSettings } from '../../../settings/app-settings'
 import { Request } from 'express'
 
 const cookieExtractor = function (req: Request) {
-  console.log(req.cookies)
   let token = null
   if (req && req.cookies) {
     token = req.cookies['refreshToken']
   }
-  console.log(token)
   return token
 }
+
 // ...
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(Strategy, 'jwt-refresh') {

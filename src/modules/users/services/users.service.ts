@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { Injectable, Logger } from '@nestjs/common'
 import { UsersRepository } from '../infrastructure/users.repository'
 import * as bcrypt from 'bcrypt'
 import { MailerService } from '@nestjs-modules/mailer'
@@ -6,6 +6,8 @@ import { MailerService } from '@nestjs-modules/mailer'
 @Injectable()
 export class UsersService {
   constructor(private usersRepository: UsersRepository, private emailService: MailerService) {}
+
+  private logger = new Logger(UsersService.name)
 
   async getUsers(page: number, pageSize: number, searchNameTerm: string, searchEmailTerm: string) {
     return await this.usersRepository.getUsers(page, pageSize, searchNameTerm, searchEmailTerm)
@@ -41,7 +43,7 @@ export class UsersService {
         subject: 'E-mail confirmation',
       })
     } catch (e) {
-      console.log(e)
+      this.logger.error(e)
     }
   }
 

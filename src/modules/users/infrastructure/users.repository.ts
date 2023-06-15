@@ -51,7 +51,6 @@ export class UsersRepository {
   }
 
   async createUser(newUser: CreateUserInput): Promise<User | null> {
-    console.log(newUser)
     return await this.prisma.user.create({
       data: {
         email: newUser.email,
