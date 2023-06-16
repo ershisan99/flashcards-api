@@ -21,8 +21,9 @@ export class UsersService {
     return await this.usersRepository.deleteUserById(id)
   }
 
-  async deleteAllUsers(): Promise<boolean> {
-    return await this.usersRepository.deleteAllUsers()
+  async deleteAllUsers(): Promise<{ deleted: number }> {
+    const deleted = await this.usersRepository.deleteAllUsers()
+    return { deleted }
   }
 
   public async sendConfirmationEmail({
@@ -41,6 +42,27 @@ export class UsersService {
         text: 'hello and welcome, token is: ' + verificationToken,
         html: `<b>Hello ${name}!</b><br/>Please confirm your email by clicking on the link below:<br/><a href="http://localhost:3000/confirm-email/${verificationToken}">Confirm email</a>`,
         subject: 'E-mail confirmation',
+      })
+    } catch (e) {
+      this.logger.error(e?.message || e)
+    }
+  }
+
+  public async sendPasswordRecoveryEmail({
+    email,
+    name,
+    passwordRecoveryToken,
+  }: {
+    email: string
+    name: string
+    passwordRecoveryToken: string
+  }) {
+    try {
+      await this.emailService.sendMail({
+        from: 'Andrii <andrii@andrii.es>',
+        to: email,
+        html: `<b>Hello ${name}!</b><br/>To recover your password follow this link:<br/><a href="http://localhost:3000/confirm-email/${passwordRecoveryToken}">Confirm email</a>. If it doesn't work, copy and paste the following link in your browser:<br/>http://localhost:3000/confirm-email/${passwordRecoveryToken} `,
+        subject: 'Password recovery',
       })
     } catch (e) {
       this.logger.error(e)

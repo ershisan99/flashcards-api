@@ -10,6 +10,8 @@ import {
   LogoutHandler,
   RefreshTokenHandler,
   ResendVerificationEmailHandler,
+  ResetPasswordHandler,
+  SendPasswordRecoveryEmailHandler,
   VerifyEmailHandler,
 } from './use-cases'
 import { AuthRepository } from './infrastructure/auth.repository'
@@ -20,6 +22,8 @@ const commandHandlers = [
   LogoutHandler,
   RefreshTokenHandler,
   ResendVerificationEmailHandler,
+  ResetPasswordHandler,
+  SendPasswordRecoveryEmailHandler,
   VerifyEmailHandler,
 ]
 

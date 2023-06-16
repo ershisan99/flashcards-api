@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Post,
   Request,
   Res,
@@ -24,6 +25,8 @@ import {
   LogoutCommand,
   RefreshTokenCommand,
   ResendVerificationEmailCommand,
+  ResetPasswordCommand,
+  SendPasswordRecoveryEmailCommand,
   VerifyEmailCommand,
 } from './use-cases'
 
@@ -96,5 +99,15 @@ export class AuthController {
     return {
       accessToken: newTokens.accessToken,
     }
+  }
+
+  @Post('recover-password')
+  async recoverPassword(@Body('email') email: string) {
+    return await this.commandBus.execute(new SendPasswordRecoveryEmailCommand(email))
+  }
+
+  @Post('reset-password/:token')
+  async resetPassword(@Body('password') password: string, @Param('token') token: string) {
+    return await this.commandBus.execute(new ResetPasswordCommand(token, password))
   }
 }

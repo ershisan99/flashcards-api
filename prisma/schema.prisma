@@ -41,6 +41,7 @@ model User {
   verification        Verification?
   RevokedToken        RevokedToken[]
   RefreshToken        RefreshToken[]
+  ResetPassword       ResetPassword?
 
   @@fulltext([name, email])
 }
@@ -62,6 +63,17 @@ model RefreshToken {
   expiresAt DateTime
   isRevoked Boolean  @default(false)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model ResetPassword {
+  id                       String    @id @default(cuid())
+  userId                   String    @unique
+  resetPasswordToken       String?   @unique @default(uuid())
+  resetPasswordTokenExpiry DateTime?
+  resetPasswordEmailsSent  Int       @default(0)
+  user                     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
