@@ -105,26 +105,20 @@ model Card {
 }
 
 model Deck {
-  id         String   @id @default(cuid())
-  userId     String
-  userName   String
-  name       String
-  private    Boolean
-  path       String
-  grade      Int
-  shots      Int
-  cardsCount Int
-  deckCover  String?
-  type       String
-  rating     Int
-  moreId     String?
-  isDeleted  Boolean?
-  isBlocked  Boolean?
-  created    DateTime @default(now())
-  updated    DateTime @updatedAt
-  user       User     @relation(fields: [userId], references: [id])
-  Card       Card[] // One-to-many relation
-  Grade      Grade[]
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  isPrivate Boolean  @default(false)
+  shots     Int      @default(0)
+  cover     String?
+  rating    Int      @default(0)
+  isDeleted Boolean?
+  isBlocked Boolean?
+  created   DateTime @default(now())
+  updated   DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id])
+  Card      Card[]
+  Grade     Grade[]
 
   @@index([userId])
 }

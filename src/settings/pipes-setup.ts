@@ -20,6 +20,7 @@ export function pipesSetup(app: INestApplication) {
     new ValidationPipe({
       whitelist: true,
       transform: true,
+      forbidNonWhitelisted: true,
 
       stopAtFirstError: true,
       exceptionFactory: (errors: ValidationError[]) => {

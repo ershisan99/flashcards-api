@@ -1,9 +1,10 @@
 import { NestFactory } from '@nestjs/core'
 import { AppModule } from './app.module'
-import { BadRequestException, Logger, ValidationPipe } from '@nestjs/common'
+import { Logger } from '@nestjs/common'
 import { HttpExceptionFilter } from './exception.filter'
 import * as cookieParser from 'cookie-parser'
-import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger'
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import { pipesSetup } from './settings/pipes-setup'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
@@ -15,18 +16,7 @@ async function bootstrap() {
     .build()
   const document = SwaggerModule.createDocument(app, config)
   SwaggerModule.setup('docs', app, document)
-  app.useGlobalPipes(
-    new ValidationPipe({
-      stopAtFirstError: false,
-      exceptionFactory: errors => {
-        const customErrors = errors.map(e => {
-          const firstError = JSON.stringify(e.constraints)
-          return { field: e.property, message: firstError }
-        })
-        throw new BadRequestException(customErrors)
-      },
-    })
-  )
+  pipesSetup(app)
   app.useGlobalFilters(new HttpExceptionFilter())
   app.use(cookieParser())
   await app.listen(process.env.PORT || 3000)

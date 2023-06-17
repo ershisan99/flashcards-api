@@ -8,6 +8,7 @@ import { MailerModule } from '@nestjs-modules/mailer'
 import * as process from 'process'
 import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strategy'
 import { CqrsModule } from '@nestjs/cqrs'
+import { DecksModule } from './modules/decks/decks.module'
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { CqrsModule } from '@nestjs/cqrs'
     ConfigModule,
     UsersModule,
     AuthModule,
+    DecksModule,
     PrismaModule,
 
     MailerModule.forRoot({
