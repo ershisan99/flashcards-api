@@ -15,13 +15,15 @@ import { DecksService } from './decks.service'
 import { CreateDeckDto } from './dto/create-deck.dto'
 import { UpdateDeckDto } from './dto/update-deck.dto'
 import { CommandBus } from '@nestjs/cqrs'
-import { CreateDeckCommand } from './use-cases'
+import {
+  CreateDeckCommand,
+  DeleteDeckByIdCommand,
+  GetAllDecksCommand,
+  GetDeckByIdCommand,
+  UpdateDeckCommand,
+} from './use-cases'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { GetAllDecksCommand } from './use-cases/get-all-decks-use-case'
 import { GetAllDecksDto } from './dto/get-all-decks.dto'
-import { GetDeckByIdCommand } from './use-cases/get-deck-by-id-use-case'
-import { DeleteDeckByIdCommand } from './use-cases/delete-deck-by-id-use-case'
-import { UpdateDeckCommand } from './use-cases/update-deck-use-case'
 
 @Controller('decks')
 export class DecksController {
