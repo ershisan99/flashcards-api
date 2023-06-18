@@ -17,9 +17,12 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
 
   async execute(command: UpdateDeckCommand) {
     const deck = await this.deckRepository.findDeckById(command.deckId)
-    if (!deck) throw new NotFoundException(`Deck with id ${command.deckId} not found`)
+    if (!deck) {
+      throw new NotFoundException(`Deck with id ${command.deckId} not found`)
+    }
+
     if (deck.userId !== command.userId) {
-      throw new BadRequestException(`You can't change a deck that you don't own`)
+      throw new BadRequestException(`You can't modify a deck that you don't own`)
     }
 
     return await this.deckRepository.updateDeckById(command.deckId, command.deck)

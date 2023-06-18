@@ -9,10 +9,10 @@ import {
   GetAllDecksHandler,
   UpdateDeckHandler,
   GetAllCardsInDeckHandler,
+  CreateCardHandler,
 } from './use-cases'
 import { DecksRepository } from './infrastructure/decks.repository'
 import { CardsRepository } from '../cards/infrastructure/cards.repository'
-import { CreateCardHandler } from './use-cases/create-card-use-case'
 
 const commandHandlers = [
   CreateDeckHandler,
