@@ -82,23 +82,23 @@ model Card {
   id            String   @id @default(cuid())
   deckId        String
   userId        String
-  question      String
-  answer        String
-  grade         Int
-  shots         Int
+  question      String   @db.Text
+  answer        String   @db.Text
+  grade         Int      @default(0)
+  shots         Int      @default(0)
   questionImg   String?
   answerImg     String?
   answerVideo   String?
   questionVideo String?
   comments      String?
   type          String?
-  rating        Int
+  rating        Int      @default(0)
   moreId        String?
   created       DateTime @default(now())
   updated       DateTime @updatedAt
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   decks         Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
-  grades        Grade[] // One-to-many relation
+  grades        Grade[]
 
   @@index([userId])
   @@index([deckId])

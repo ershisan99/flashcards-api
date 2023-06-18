@@ -18,12 +18,16 @@ import { CommandBus } from '@nestjs/cqrs'
 import {
   CreateDeckCommand,
   DeleteDeckByIdCommand,
+  GetAllCardsInDeckCommand,
   GetAllDecksCommand,
   GetDeckByIdCommand,
   UpdateDeckCommand,
 } from './use-cases'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { GetAllDecksDto } from './dto/get-all-decks.dto'
+import { GetAllCardsInDeckDto } from '../cards/dto/get-all-cards.dto'
+import { CreateCardCommand } from './use-cases/create-card-use-case'
+import { CreateCardDto } from '../cards/dto/create-card.dto'
 
 @Controller('decks')
 export class DecksController {
@@ -46,6 +50,18 @@ export class DecksController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.commandBus.execute(new GetDeckByIdCommand(id))
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/cards')
+  findCardsInDeck(@Param('id') id: string, @Req() req, @Query() query: GetAllCardsInDeckDto) {
+    return this.commandBus.execute(new GetAllCardsInDeckCommand(req.user.id, id, query))
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/cards')
+  createCardInDeck(@Param('id') id: string, @Req() req, @Body() card: CreateCardDto) {
+    return this.commandBus.execute(new CreateCardCommand(req.user.id, id, card))
   }
 
   @UseGuards(JwtAuthGuard)
