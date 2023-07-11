@@ -8,6 +8,12 @@ import { pipesSetup } from './settings/pipes-setup'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  })
+  app.use(cookieParser())
+
   app.setGlobalPrefix('v1')
   const config = new DocumentBuilder()
     .setTitle('Flashcards')
@@ -18,7 +24,6 @@ async function bootstrap() {
   SwaggerModule.setup('docs', app, document)
   pipesSetup(app)
   app.useGlobalFilters(new HttpExceptionFilter())
-  app.use(cookieParser())
   await app.listen(process.env.PORT || 3000)
   const logger = new Logger('NestApplication')
   logger.log(`Application is running on: ${await app.getUrl()}`)

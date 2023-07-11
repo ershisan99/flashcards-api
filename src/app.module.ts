@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common'
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { JwtStrategy } from './modules/auth/strategies/jwt.strategy'
 import { ConfigModule } from './settings/config.module'
 import { AuthModule } from './modules/auth/auth.module'
@@ -10,6 +10,7 @@ import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strate
 import { CqrsModule } from '@nestjs/cqrs'
 import { DecksModule } from './modules/decks/decks.module'
 import { CardsModule } from './modules/cards/cards.module'
+import { LoggerMiddleware } from './infrastructure/middlewares/logs-middleware'
 
 @Module({
   imports: [
@@ -37,4 +38,8 @@ import { CardsModule } from './modules/cards/cards.module'
   providers: [JwtStrategy, JwtRefreshStrategy],
   exports: [CqrsModule],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    // consumer.apply(LoggerMiddleware).forRoutes('*') // applies the middleware to all routes
+  }
+}

@@ -48,8 +48,14 @@ export class AuthController {
     const userData = req.user.data
     res.cookie('refreshToken', userData.refreshToken, {
       httpOnly: true,
-      // secure: true,
+      sameSite: 'none',
       path: '/v1/auth/refresh-token',
+      secure: true,
+    })
+    res.cookie('accessToken', userData.accessToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
     })
     return { accessToken: req.user.data.accessToken }
   }

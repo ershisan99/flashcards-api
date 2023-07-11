@@ -4,6 +4,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 import { AuthService } from '../auth.service'
 import { AppSettings } from '../../../settings/app-settings'
 import { UsersService } from '../../users/services/users.service'
+import { Request as RequestType } from 'express'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -13,7 +14,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private userService: UsersService
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromExtractors([
+        JwtStrategy.extractJWT,
+        ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ]),
       ignoreExpiration: false,
       secretOrKey: appSettings.auth.ACCESS_JWT_SECRET_KEY,
     })
@@ -25,5 +29,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException()
     }
     return user
+  }
+
+  private static extractJWT(req: RequestType): string | null {
+    if (req.cookies && 'accessToken' in req.cookies && req.cookies.accessToken.length > 0) {
+      return req.cookies.accessToken
+    }
+    return null
   }
 }
