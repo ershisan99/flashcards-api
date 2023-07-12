@@ -10,5 +10,5 @@ export class PaginationDto {
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
-  pageSize?: number
+  itemsPerPage?: number
 }

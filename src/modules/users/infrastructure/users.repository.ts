@@ -14,8 +14,8 @@ import {
 import { addHours } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 import { PrismaService } from '../../../prisma.service'
-import { pick } from 'remeda'
 import { Prisma } from '@prisma/client'
+import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 
 @Injectable()
 export class UsersRepository {
@@ -30,31 +30,29 @@ export class UsersRepository {
     searchEmailTerm: string
   ): Promise<EntityWithPaginationType<UserViewType>> {
     try {
-      const where = {
+      const where: Prisma.userWhereInput = {
         name: {
-          search: searchNameTerm || undefined,
+          contains: searchNameTerm || undefined,
         },
         email: {
-          search: searchEmailTerm || undefined,
+          contains: searchEmailTerm || undefined,
         },
       }
-      const [totalItems, users] = await this.prisma.$transaction([
+      const res = await this.prisma.$transaction([
         this.prisma.user.count({ where }),
         this.prisma.user.findMany({
           where,
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            isEmailVerified: true,
+          },
           skip: (currentPage - 1) * itemsPerPage,
           take: itemsPerPage,
         }),
       ])
-      const totalPages = Math.ceil(totalItems / itemsPerPage)
-      const usersView = users.map(u => pick(u, ['id', 'name', 'email', 'isEmailVerified']))
-      return {
-        totalPages,
-        currentPage,
-        itemsPerPage,
-        totalItems,
-        items: usersView,
-      }
+      return Pagination.transformPaginationData(res, { currentPage, itemsPerPage })
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2025') {
@@ -124,7 +122,7 @@ export class UsersRepository {
     }
   }
 
-  async findUserById(id: string, include?: Prisma.UserInclude) {
+  async findUserById(id: string, include?: Prisma.userInclude) {
     try {
       const user = await this.prisma.user.findUnique({
         where: { id },
@@ -134,7 +132,7 @@ export class UsersRepository {
         return null
       }
 
-      return user as Prisma.UserGetPayload<{ include: typeof include }>
+      return user as Prisma.userGetPayload<{ include: typeof include }>
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
         if (e.code === 'P2015') {

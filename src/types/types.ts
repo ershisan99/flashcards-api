@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+
 export type NewestLikesType = {
   id: string
   login: string
@@ -46,12 +47,13 @@ export type CommentType = {
     myStatus: string
   }
 }
-
 export type EntityWithPaginationType<T> = {
-  totalPages: number
-  currentPage: number
-  itemsPerPage: number
-  totalItems: number
+  pagination: {
+    totalPages: number
+    currentPage: number
+    itemsPerPage: number
+    totalItems: number
+  }
   items: T[]
 }
 
@@ -65,22 +67,22 @@ export type ErrorMessageType = {
   field: string
 }
 
-const userInclude: Prisma.UserInclude = {
+const userInclude: Prisma.userInclude = {
   verification: true,
 }
 
-export type VerificationWithUser = Prisma.VerificationGetPayload<{
+export type VerificationWithUser = Prisma.verificationGetPayload<{
   include: { user: true }
 }>
 
-export type User = Prisma.UserGetPayload<{
+export type User = Prisma.userGetPayload<{
   include: typeof userInclude
 }>
 
-export type CreateUserInput = Omit<Prisma.UserCreateInput & Prisma.VerificationCreateInput, 'user'>
+export type CreateUserInput = Omit<Prisma.userCreateInput & Prisma.verificationCreateInput, 'user'>
 
 export type UserType = {
-  accountData: Prisma.UserCreateInput
+  accountData: Prisma.userCreateInput
   emailConfirmation: EmailConfirmationType
 }
 
@@ -139,4 +141,5 @@ export enum LikeAction {
   Dislike = 'Dislike',
   None = 'None',
 }
+
 export type LikeActionType = 'Like' | 'Dislike' | 'None'

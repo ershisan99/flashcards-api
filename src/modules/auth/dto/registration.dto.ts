@@ -1,7 +1,8 @@
-import { IsEmail, Length } from 'class-validator'
+import { IsEmail, Length, IsOptional } from 'class-validator'
 
 export class RegistrationDto {
   @Length(3, 30)
+  @IsOptional()
   name: string
   @Length(3, 30)
   password: string

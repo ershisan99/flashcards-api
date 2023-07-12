@@ -9,19 +9,19 @@ generator client {
   previewFeatures = ["fullTextSearch", "fullTextIndex"]
 }
 
-model Verification {
+model verification {
   id                      String    @id @default(cuid())
   userId                  String    @unique
   isEmailVerified         Boolean   @default(false)
   verificationToken       String?   @unique @default(uuid())
   verificationTokenExpiry DateTime?
   verificationEmailsSent  Int       @default(0)
-  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                    user      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-model User {
+model user {
   id                  String               @id @default(uuid())
   email               String               @unique
   password            String
@@ -34,51 +34,51 @@ model User {
   deleteTime          Int?
   created             DateTime             @default(now())
   updated             DateTime             @updatedAt
-  cards               Card[]
-  decks               Deck[]
-  grades              Grade[]
+  cards               card[]
+  decks               deck[]
+  grades              grade[]
   generalChatMessages GeneralChatMessage[]
-  verification        Verification?
-  RevokedToken        RevokedToken[]
-  RefreshToken        RefreshToken[]
-  ResetPassword       ResetPassword?
+  verification        verification?
+  revokedToken        revokedToken[]
+  RefreshToken        refreshToken[]
+  resetPassword       resetPassword?
 
   @@fulltext([name, email])
 }
 
-model RevokedToken {
+model revokedToken {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique
   revokedAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-model RefreshToken {
+model refreshToken {
   id        String   @id @default(cuid())
   userId    String
   token     String   @unique @db.VarChar(255)
   expiresAt DateTime
   isRevoked Boolean  @default(false)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-model ResetPassword {
+model resetPassword {
   id                       String    @id @default(cuid())
   userId                   String    @unique
   resetPasswordToken       String?   @unique @default(uuid())
   resetPasswordTokenExpiry DateTime?
   resetPasswordEmailsSent  Int       @default(0)
-  user                     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user                     user      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
-model Card {
+model card {
   id            String   @id @default(cuid())
   deckId        String
   userId        String
@@ -96,34 +96,35 @@ model Card {
   moreId        String?
   created       DateTime @default(now())
   updated       DateTime @updatedAt
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  decks         Deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
-  grades        Grade[]
+  author        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decks         deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  grades        grade[]
 
   @@index([userId])
   @@index([deckId])
 }
 
-model Deck {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  isPrivate Boolean  @default(false)
-  shots     Int      @default(0)
-  cover     String?
-  rating    Int      @default(0)
-  isDeleted Boolean?
-  isBlocked Boolean?
-  created   DateTime @default(now())
-  updated   DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  Card      Card[]
-  Grade     Grade[]
+model deck {
+  id         String   @id @default(cuid())
+  userId     String
+  name       String
+  isPrivate  Boolean  @default(false)
+  shots      Int      @default(0)
+  cover      String?
+  rating     Int      @default(0)
+  isDeleted  Boolean?
+  isBlocked  Boolean?
+  created    DateTime @default(now())
+  updated    DateTime @updatedAt
+  author     user     @relation(fields: [userId], references: [id])
+  cardsCount Int      @default(0)
+  card       card[]
+  grade      grade[]
 
   @@index([userId])
 }
 
-model Grade {
+model grade {
   id      String   @id @default(cuid())
   deckId  String
   cardId  String
@@ -133,9 +134,9 @@ model Grade {
   moreId  String?
   created DateTime @default(now())
   updated DateTime @updatedAt
-  user    User     @relation(fields: [userId], references: [id])
-  card    Card     @relation(fields: [cardId], references: [id])
-  decks   Deck     @relation(fields: [deckId], references: [id])
+  user    user     @relation(fields: [userId], references: [id])
+  card    card     @relation(fields: [cardId], references: [id])
+  decks   deck     @relation(fields: [deckId], references: [id])
 
   @@index([userId])
   @@index([deckId])
@@ -151,7 +152,7 @@ model GeneralChatMessage {
   message  String
   created  DateTime @default(now())
   updated  DateTime @updatedAt
-  user     User     @relation(fields: [userId], references: [id])
+  user     user     @relation(fields: [userId], references: [id])
 
   @@index([userId])
 }

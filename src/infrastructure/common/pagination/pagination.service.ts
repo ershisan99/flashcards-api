@@ -1,9 +1,43 @@
+import { isObject } from 'remeda'
+
 export class Pagination {
-  static getPaginationData(query) {
-    const page = typeof query.PageNumber === 'string' ? +query.PageNumber : 1
-    const pageSize = typeof query.PageSize === 'string' ? +query.PageSize : 10
-    const searchNameTerm = typeof query.SearchNameTerm === 'string' ? query.SearchNameTerm : ''
-    const searchEmailTerm = typeof query.SearchEmailTerm === 'string' ? query.SearchEmailTerm : ''
-    return { page, pageSize, searchNameTerm, searchEmailTerm }
+  static getPaginationData<T>(query: T) {
+    if (!isObject(query)) throw new Error('Pagination.getPaginationData: query is not an object')
+
+    const currentPage =
+      'currentPage' in query &&
+      typeof query.currentPage === 'string' &&
+      !isNaN(Number(query.currentPage))
+        ? +query.currentPage
+        : 1
+    const itemsPerPage =
+      'itemsPerPage' in query &&
+      typeof query.itemsPerPage === 'string' &&
+      !isNaN(Number(query.itemsPerPage))
+        ? +query.itemsPerPage
+        : 10
+    return { currentPage, itemsPerPage, ...query }
+  }
+
+  static transformPaginationData<T>(
+    [count, items]: [number, T],
+    {
+      currentPage,
+      itemsPerPage,
+    }: {
+      currentPage: number
+      itemsPerPage: number
+    }
+  ) {
+    const totalPages = Math.ceil(count / itemsPerPage)
+    return {
+      pagination: {
+        totalPages,
+        currentPage,
+        itemsPerPage,
+        totalItems: count,
+      },
+      items,
+    }
   }
 }

@@ -26,8 +26,9 @@ import {
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { GetAllDecksDto } from './dto/get-all-decks.dto'
 import { GetAllCardsInDeckDto } from '../cards/dto/get-all-cards.dto'
-import { CreateCardCommand } from './use-cases/create-card-use-case'
+import { CreateCardCommand } from './use-cases'
 import { CreateCardDto } from '../cards/dto/create-card.dto'
+import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
 
 @Controller('decks')
 export class DecksController {
@@ -43,7 +44,8 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @Get()
   findAll(@Query() query: GetAllDecksDto, @Req() req) {
-    return this.commandBus.execute(new GetAllDecksCommand({ ...query, userId: req.user.id }))
+    const finalQuery = Pagination.getPaginationData(query)
+    return this.commandBus.execute(new GetAllDecksCommand({ ...finalQuery, userId: req.user.id }))
   }
 
   @UseGuards(JwtAuthGuard)

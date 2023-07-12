@@ -9,8 +9,8 @@ export class UsersService {
 
   private logger = new Logger(UsersService.name)
 
-  async getUsers(page: number, pageSize: number, searchNameTerm: string, searchEmailTerm: string) {
-    return await this.usersRepository.getUsers(page, pageSize, searchNameTerm, searchEmailTerm)
+  async getUsers(page: number, pageSize: number, name: string, email: string) {
+    return await this.usersRepository.getUsers(page, pageSize, name, email)
   }
 
   async getUserById(id: string) {

@@ -1,32 +1,44 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
 import { GetAllCardsInDeckDto } from '../dto/get-all-cards.dto'
-import {
-  DEFAULT_PAGE_NUMBER,
-  DEFAULT_PAGE_SIZE,
-} from '../../../infrastructure/common/pagination/pagination.constants'
 import { CreateCardDto } from '../dto/create-card.dto'
 
 @Injectable()
 export class CardsRepository {
   constructor(private prisma: PrismaService) {}
+
   private readonly logger = new Logger(CardsRepository.name)
+
   async createCard(deckId: string, userId: string, card: CreateCardDto) {
     try {
-      return await this.prisma.card.create({
-        data: {
-          user: {
-            connect: {
-              id: userId,
+      return await this.prisma.$transaction(async tx => {
+        const created = await tx.card.create({
+          data: {
+            author: {
+              connect: {
+                id: userId,
+              },
+            },
+            decks: {
+              connect: {
+                id: deckId,
+              },
+            },
+
+            ...card,
+          },
+        })
+        await tx.deck.update({
+          where: {
+            id: deckId,
+          },
+          data: {
+            cardsCount: {
+              increment: 1,
             },
           },
-          decks: {
-            connect: {
-              id: deckId,
-            },
-          },
-          ...card,
-        },
+        })
+        return created
       })
     } catch (e) {
       this.logger.error(e?.message)
@@ -36,12 +48,7 @@ export class CardsRepository {
 
   async findCardsByDeckId(
     deckId: string,
-    {
-      answer = undefined,
-      question = undefined,
-      currentPage = DEFAULT_PAGE_NUMBER,
-      pageSize = DEFAULT_PAGE_SIZE,
-    }: GetAllCardsInDeckDto
+    { answer = undefined, question = undefined, currentPage, itemsPerPage }: GetAllCardsInDeckDto
   ) {
     try {
       return await this.prisma.card.findMany({
@@ -56,14 +63,15 @@ export class CardsRepository {
             contains: answer || undefined,
           },
         },
-        skip: (currentPage - 1) * pageSize,
-        take: pageSize,
+        skip: (currentPage - 1) * itemsPerPage,
+        take: itemsPerPage,
       })
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
     }
   }
+
   public async findDeckById(id: string) {
     try {
       return await this.prisma.deck.findUnique({
