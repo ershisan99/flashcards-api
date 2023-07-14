@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@ne
 import { CardsService } from './cards.service'
 import { UpdateCardDto } from './dto/update-card.dto'
 import { CommandBus } from '@nestjs/cqrs'
-import { DeleteDeckByIdCommand, GetDeckByIdCommand, UpdateDeckCommand } from './use-cases'
+import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateDeckCommand } from './use-cases'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 
 @Controller('cards')
@@ -24,6 +24,6 @@ export class CardsController {
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req) {
-    return this.commandBus.execute(new DeleteDeckByIdCommand(id, req.user.id))
+    return this.commandBus.execute(new DeleteCardByIdCommand(id, req.user.id))
   }
 }

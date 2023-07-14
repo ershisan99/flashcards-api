@@ -84,7 +84,6 @@ model card {
   userId        String
   question      String   @db.Text
   answer        String   @db.Text
-  grade         Int      @default(0)
   shots         Int      @default(0)
   questionImg   String?
   answerImg     String?
@@ -116,27 +115,26 @@ model deck {
   isBlocked  Boolean?
   created    DateTime @default(now())
   updated    DateTime @updatedAt
-  author     user     @relation(fields: [userId], references: [id])
   cardsCount Int      @default(0)
+  author     user     @relation(fields: [userId], references: [id])
   card       card[]
-  grade      grade[]
+  grades     grade[]
 
   @@index([userId])
 }
 
 model grade {
   id      String   @id @default(cuid())
-  deckId  String
-  cardId  String
-  userId  String
+  deckId  String   @unique
+  cardId  String   @unique
+  userId  String   @unique
   grade   Int
   shots   Int
-  moreId  String?
   created DateTime @default(now())
   updated DateTime @updatedAt
   user    user     @relation(fields: [userId], references: [id])
   card    card     @relation(fields: [cardId], references: [id])
-  decks   deck     @relation(fields: [deckId], references: [id])
+  deck    deck     @relation(fields: [deckId], references: [id])
 
   @@index([userId])
   @@index([deckId])

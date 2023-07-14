@@ -29,10 +29,16 @@ export class PrismaService extends PrismaClient implements OnModuleInit {
   async onModuleInit() {
     await this.$connect()
   }
-
-  async enableShutdownHooks(app: INestApplication) {
-    this.$on('beforeExit', async () => {
+  private exitHandler(app: INestApplication) {
+    return async () => {
       await app.close()
-    })
+    }
+  }
+  async enableShutdownHooks(app: INestApplication) {
+    process.on('exit', this.exitHandler(app))
+    process.on('beforeExit', this.exitHandler(app))
+    process.on('SIGINT', this.exitHandler(app))
+    process.on('SIGTERM', this.exitHandler(app))
+    process.on('SIGUSR2', this.exitHandler(app))
   }
 }

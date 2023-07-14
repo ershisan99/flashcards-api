@@ -17,6 +17,6 @@ export class GetCurrentUserDataHandler implements ICommandHandler<GetCurrentUser
 
     if (!user) throw new UnauthorizedException()
 
-    return pick(user, ['email', 'name', 'id', 'isEmailVerified'])
+    return pick(user, ['email', 'name', 'id', 'isEmailVerified', 'avatar'])
   }
 }

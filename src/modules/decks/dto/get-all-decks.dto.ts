@@ -1,6 +1,7 @@
 import { IsUUID } from 'class-validator'
 import { IsOptionalOrEmptyString } from '../../../infrastructure/decorators/is-optional-or-empty-string'
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
+import { IsOrderBy } from '../../../infrastructure/decorators/is-order-by-constraint'
 
 export class GetAllDecksDto extends PaginationDto {
   @IsOptionalOrEmptyString()
@@ -17,4 +18,7 @@ export class GetAllDecksDto extends PaginationDto {
   authorId?: string
 
   userId: string
+
+  @IsOrderBy()
+  orderBy?: string | null
 }

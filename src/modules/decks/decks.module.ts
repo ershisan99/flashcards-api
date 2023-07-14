@@ -13,21 +13,26 @@ import {
 } from './use-cases'
 import { DecksRepository } from './infrastructure/decks.repository'
 import { CardsRepository } from '../cards/infrastructure/cards.repository'
+import { GetRandomCardInDeckHandler } from './use-cases/get-random-card-in-deck-use-case'
+import { GradesRepository } from './infrastructure/grades.repository'
+import { SaveGradeHandler } from './use-cases/save-grade-use-case'
 
 const commandHandlers = [
   CreateDeckHandler,
   GetAllDecksHandler,
   GetDeckByIdHandler,
+  GetRandomCardInDeckHandler,
   DeleteDeckByIdHandler,
   UpdateDeckHandler,
   GetAllCardsInDeckHandler,
   CreateCardHandler,
+  SaveGradeHandler,
 ]
 
 @Module({
   imports: [CqrsModule],
   controllers: [DecksController],
-  providers: [DecksService, DecksRepository, CardsRepository, ...commandHandlers],
+  providers: [DecksService, DecksRepository, CardsRepository, GradesRepository, ...commandHandlers],
   exports: [CqrsModule],
 })
 export class DecksModule {}

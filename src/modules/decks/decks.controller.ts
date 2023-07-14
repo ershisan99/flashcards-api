@@ -22,13 +22,15 @@ import {
   GetAllDecksCommand,
   GetDeckByIdCommand,
   UpdateDeckCommand,
+  CreateCardCommand,
 } from './use-cases'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { GetAllDecksDto } from './dto/get-all-decks.dto'
 import { GetAllCardsInDeckDto } from '../cards/dto/get-all-cards.dto'
-import { CreateCardCommand } from './use-cases'
 import { CreateCardDto } from '../cards/dto/create-card.dto'
 import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
+import { GetRandomCardInDeckCommand } from './use-cases/get-random-card-in-deck-use-case'
+import { SaveGradeCommand } from './use-cases/save-grade-use-case'
 
 @Controller('decks')
 export class DecksController {
@@ -57,9 +59,21 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @Get(':id/cards')
   findCardsInDeck(@Param('id') id: string, @Req() req, @Query() query: GetAllCardsInDeckDto) {
-    return this.commandBus.execute(new GetAllCardsInDeckCommand(req.user.id, id, query))
+    const finalQuery = Pagination.getPaginationData(query)
+    return this.commandBus.execute(new GetAllCardsInDeckCommand(req.user.id, id, finalQuery))
   }
-
+  @UseGuards(JwtAuthGuard)
+  @Get(':id/learn')
+  findRandomCardInDeck(@Param('id') id: string, @Req() req) {
+    return this.commandBus.execute(new GetRandomCardInDeckCommand(req.user.id, id))
+  }
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/learn')
+  saveGrade(@Param('id') id: string, @Req() req, @Body() body: any) {
+    return this.commandBus.execute(
+      new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
+    )
+  }
   @UseGuards(JwtAuthGuard)
   @Post(':id/cards')
   createCardInDeck(@Param('id') id: string, @Req() req, @Body() card: CreateCardDto) {

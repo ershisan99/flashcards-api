@@ -16,7 +16,7 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
   constructor(private readonly deckRepository: CardsRepository) {}
 
   async execute(command: UpdateDeckCommand) {
-    const deck = await this.deckRepository.findDeckById(command.deckId)
+    const deck = await this.deckRepository.findCardById(command.deckId)
 
     if (!deck) throw new NotFoundException(`Deck with id ${command.deckId} not found`)
 

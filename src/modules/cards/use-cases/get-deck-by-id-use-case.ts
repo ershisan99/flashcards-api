@@ -10,6 +10,6 @@ export class GetDeckByIdHandler implements ICommandHandler<GetDeckByIdCommand> {
   constructor(private readonly deckRepository: CardsRepository) {}
 
   async execute(command: GetDeckByIdCommand) {
-    return await this.deckRepository.findDeckById(command.id)
+    return await this.deckRepository.findCardById(command.id)
   }
 }

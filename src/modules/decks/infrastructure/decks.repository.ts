@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common
 import { PrismaService } from '../../../prisma.service'
 import { GetAllDecksDto } from '../dto/get-all-decks.dto'
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
+import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
 
 @Injectable()
 export class DecksRepository {
@@ -48,13 +49,15 @@ export class DecksRepository {
     itemsPerPage,
     minCardsCount,
     maxCardsCount,
+    orderBy,
   }: GetAllDecksDto) {
-    console.log({ name, authorId, userId, currentPage, itemsPerPage, minCardsCount, maxCardsCount })
+    console.log(minCardsCount)
+    console.log(Number(minCardsCount))
     try {
       const where = {
         cardsCount: {
-          gte: Number(minCardsCount) ?? undefined,
-          lte: Number(maxCardsCount) ?? undefined,
+          gte: minCardsCount ? Number(minCardsCount) : undefined,
+          lte: maxCardsCount ? Number(maxCardsCount) : undefined,
         },
         name: {
           contains: name,
@@ -85,9 +88,7 @@ export class DecksRepository {
         }),
         this.prisma.deck.findMany({
           where,
-          orderBy: {
-            created: 'desc',
-          },
+          orderBy: createPrismaOrderBy(orderBy),
           include: {
             author: {
               select: {
@@ -117,6 +118,24 @@ export class DecksRepository {
       return await this.prisma.deck.findUnique({
         where: {
           id,
+        },
+      })
+    } catch (e) {
+      this.logger.error(e?.message)
+      throw new InternalServerErrorException(e?.message)
+    }
+  }
+  public async findDeckByCardId(cardId: string) {
+    try {
+      const card = await this.prisma.card.findUnique({
+        where: {
+          id: cardId,
+        },
+      })
+
+      return await this.prisma.deck.findUnique({
+        where: {
+          id: card.deckId,
         },
       })
     } catch (e) {

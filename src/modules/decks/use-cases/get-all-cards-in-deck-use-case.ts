@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { GetAllCardsInDeckDto } from '../../cards/dto/get-all-cards.dto'
 import { ForbiddenException, NotFoundException } from '@nestjs/common'
+import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class GetAllCardsInDeckCommand {
   constructor(
@@ -13,10 +14,13 @@ export class GetAllCardsInDeckCommand {
 
 @CommandHandler(GetAllCardsInDeckCommand)
 export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDeckCommand> {
-  constructor(private readonly cardsRepository: CardsRepository) {}
+  constructor(
+    private readonly cardsRepository: CardsRepository,
+    private readonly decksRepository: DecksRepository
+  ) {}
 
   async execute(command: GetAllCardsInDeckCommand) {
-    const deck = await this.cardsRepository.findDeckById(command.deckId)
+    const deck = await this.decksRepository.findDeckById(command.deckId)
     if (!deck) throw new NotFoundException(`Deck with id ${command.deckId} not found`)
 
     if (deck.userId !== command.userId && deck.isPrivate) {
