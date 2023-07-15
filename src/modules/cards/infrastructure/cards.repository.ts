@@ -4,6 +4,7 @@ import { GetAllCardsInDeckDto } from '../dto/get-all-cards.dto'
 import { CreateCardDto } from '../dto/create-card.dto'
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
+import { UpdateCardDto } from '../dto/update-card.dto'
 
 @Injectable()
 export class CardsRepository {
@@ -146,12 +147,9 @@ export class CardsRepository {
     }
   }
 
-  public async updateDeckById(
-    id: string,
-    data: { name?: string; cover?: string; isPrivate?: boolean }
-  ) {
+  public async updateCardById(id: string, data: UpdateCardDto) {
     try {
-      return await this.prisma.deck.update({
+      return await this.prisma.card.update({
         where: {
           id,
         },

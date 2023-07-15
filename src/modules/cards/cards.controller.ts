@@ -1,9 +1,21 @@
-import { Body, Controller, Delete, Get, Param, Patch, Req, UseGuards } from '@nestjs/common'
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Req,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common'
 import { CardsService } from './cards.service'
 import { UpdateCardDto } from './dto/update-card.dto'
 import { CommandBus } from '@nestjs/cqrs'
-import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateDeckCommand } from './use-cases'
+import { DeleteCardByIdCommand, GetDeckByIdCommand } from './use-cases'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
 @Controller('cards')
 export class CardsController {
@@ -16,9 +28,23 @@ export class CardsController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'questionImg', maxCount: 1 },
+      { name: 'answerImg', maxCount: 1 },
+    ])
+  )
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDeckDto: UpdateCardDto, @Req() req) {
-    return this.commandBus.execute(new UpdateDeckCommand(id, updateDeckDto, req.user.id))
+  update(
+    @Param('id') id: string,
+    @Req() req,
+    @UploadedFiles()
+    files: { questionImg: Express.Multer.File[]; answerImg: Express.Multer.File[] },
+    @Body() body: UpdateCardDto
+  ) {
+    console.log({ body })
+    console.log(files)
+    // return this.commandBus.execute(new UpdateCardCommand(id, body, req.user.id))
   }
 
   @UseGuards(JwtAuthGuard)

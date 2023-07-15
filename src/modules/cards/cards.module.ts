@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common'
 import { CardsService } from './cards.service'
 import { CardsController } from './cards.controller'
 import { CqrsModule } from '@nestjs/cqrs'
-import { DeleteCardByIdHandler, GetDeckByIdHandler, UpdateDeckHandler } from './use-cases'
+import { DeleteCardByIdHandler, GetDeckByIdHandler, UpdateCardHandler } from './use-cases'
 import { CardsRepository } from './infrastructure/cards.repository'
 
-const commandHandlers = [GetDeckByIdHandler, DeleteCardByIdHandler, UpdateDeckHandler]
+const commandHandlers = [GetDeckByIdHandler, DeleteCardByIdHandler, UpdateCardHandler]
 
 @Module({
   imports: [CqrsModule],

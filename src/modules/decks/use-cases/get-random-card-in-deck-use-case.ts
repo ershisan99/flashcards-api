@@ -8,13 +8,16 @@ import { pick } from 'remeda'
 export class GetRandomCardInDeckCommand {
   constructor(public readonly userId: string, public readonly deckId: string) {}
 }
+
 type CardWithGrade = Prisma.cardGetPayload<{ include: { grades: true } }>
+
 @CommandHandler(GetRandomCardInDeckCommand)
 export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCardInDeckCommand> {
   constructor(
     private readonly cardsRepository: CardsRepository,
     private readonly decksRepository: DecksRepository
   ) {}
+
   private async getSmartRandomCard(cards: Array<CardWithGrade>) {
     const selectionPool: Array<CardWithGrade> = []
     cards.forEach(card => {
