@@ -19,7 +19,7 @@ async function bootstrap() {
   app.setGlobalPrefix('v1')
   const config = new DocumentBuilder()
     .setTitle('Flashcards')
-    .setDescription('The config API description')
+    .setDescription('Flashcards API')
     .setVersion('1.0')
     .addTag('Auth')
     .addTag('Decks')

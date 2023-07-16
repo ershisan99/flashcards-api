@@ -23,7 +23,7 @@ export class SaveGradeHandler implements ICommandHandler<SaveGradeCommand> {
     private readonly gradesRepository: GradesRepository
   ) {}
 
-  async execute(command: SaveGradeCommand) {
+  async execute(command: SaveGradeCommand): Promise<void> {
     const deck = await this.decksRepository.findDeckByCardId(command.args.cardId)
 
     if (!deck)
@@ -33,7 +33,7 @@ export class SaveGradeHandler implements ICommandHandler<SaveGradeCommand> {
       throw new ForbiddenException(`You can't save cards to  a private deck that you don't own`)
     }
 
-    return await this.gradesRepository.createGrade({
+    await this.gradesRepository.createGrade({
       userId: command.userId,
       grade: command.args.grade,
       cardId: command.args.cardId,

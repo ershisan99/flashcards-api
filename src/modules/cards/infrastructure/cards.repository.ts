@@ -4,6 +4,7 @@ import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import { CreateCardDto, GetAllCardsInDeckDto, UpdateCardDto } from '../dto'
+import { PaginatedCards } from '../entities/cards.entity'
 
 @Injectable()
 export class CardsRepository {
@@ -59,7 +60,7 @@ export class CardsRepository {
       itemsPerPage,
       orderBy,
     }: GetAllCardsInDeckDto
-  ) {
+  ): Promise<PaginatedCards> {
     try {
       const where = {
         decks: {

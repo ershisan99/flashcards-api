@@ -52,7 +52,7 @@ import {
 export class AuthController {
   constructor(private commandBus: CommandBus) {}
 
-  @ApiOperation({ description: 'Retrieve current user data.' })
+  @ApiOperation({ description: 'Retrieve current user data.', summary: 'Current user data' })
   @ApiUnauthorizedResponse({ description: 'Not logged in' })
   @ApiBadRequestResponse({ description: 'User not found' })
   @UseGuards(JwtAuthGuard)
@@ -63,7 +63,10 @@ export class AuthController {
     return await this.commandBus.execute(new GetCurrentUserDataCommand(userId))
   }
 
-  @ApiOperation({ description: 'Sign in using email and password. Must have an account to do so.' })
+  @ApiOperation({
+    description: 'Sign in using email and password. Must have an account to do so.',
+    summary: 'Sign in using email and password. Must have an account to do so.',
+  })
   @ApiUnauthorizedResponse({ description: 'Invalid credentials' })
   @ApiBody({ type: LoginDto })
   @HttpCode(HttpStatus.OK)
@@ -90,7 +93,7 @@ export class AuthController {
     return { accessToken: req.user.data.accessToken }
   }
 
-  @ApiOperation({ description: 'Create a new user account' })
+  @ApiOperation({ description: 'Create a new user account', summary: 'Create a new user account' })
   @ApiBadRequestResponse({ description: 'Email already exists' })
   @HttpCode(HttpStatus.CREATED)
   @Post('sign-up')
@@ -98,7 +101,7 @@ export class AuthController {
     return await this.commandBus.execute(new CreateUserCommand(registrationData))
   }
 
-  @ApiOperation({ description: 'Verify user email' })
+  @ApiOperation({ description: 'Verify user email', summary: 'Verify user email' })
   @ApiBadRequestResponse({ description: 'Email has already been verified' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiNoContentResponse({ description: 'Email verified successfully' })
@@ -108,7 +111,10 @@ export class AuthController {
     return await this.commandBus.execute(new VerifyEmailCommand(body.code))
   }
 
-  @ApiOperation({ description: 'Send verification email again' })
+  @ApiOperation({
+    description: 'Send verification email again',
+    summary: 'Send verification email again',
+  })
   @ApiBadRequestResponse({ description: 'Email has already been verified' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiNoContentResponse({ description: 'Verification email sent successfully' })
@@ -118,7 +124,7 @@ export class AuthController {
     return await this.commandBus.execute(new ResendVerificationEmailCommand(body.userId))
   }
 
-  @ApiOperation({ description: 'Sign current user out' })
+  @ApiOperation({ description: 'Sign current user out', summary: 'Sign current user out' })
   @ApiUnauthorizedResponse({ description: 'Not logged in' })
   @ApiNoContentResponse({ description: 'Logged out successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -136,7 +142,10 @@ export class AuthController {
     return null
   }
 
-  @ApiOperation({ description: 'Get new access token using refresh token' })
+  @ApiOperation({
+    description: 'Get new access token using refresh token',
+    summary: 'Get new access token using refresh token',
+  })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing refreshToken' })
   @ApiNoContentResponse({ description: 'New tokens generated successfully' })
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -165,7 +174,10 @@ export class AuthController {
     return null
   }
 
-  @ApiOperation({ description: 'Send password recovery email' })
+  @ApiOperation({
+    description: 'Send password recovery email',
+    summary: 'Send password recovery email',
+  })
   @ApiBadRequestResponse({ description: 'Email has already been verified' })
   @ApiNotFoundResponse({ description: 'User not found' })
   @ApiNoContentResponse({ description: 'Password recovery email sent successfully' })
@@ -175,7 +187,7 @@ export class AuthController {
     return await this.commandBus.execute(new SendPasswordRecoveryEmailCommand(body.email))
   }
 
-  @ApiOperation({ description: 'Reset password' })
+  @ApiOperation({ description: 'Reset password', summary: 'Reset password' })
   @ApiBadRequestResponse({ description: 'Password is required' })
   @ApiNotFoundResponse({ description: 'Incorrect or expired password reset token' })
   @ApiNoContentResponse({ description: 'Password reset successfully' })

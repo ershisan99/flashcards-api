@@ -2,6 +2,7 @@ import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { GetAllCardsInDeckDto } from '../../cards/dto'
+import { PaginatedCards } from '../../cards/entities/cards.entity'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
@@ -20,7 +21,7 @@ export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDe
     private readonly decksRepository: DecksRepository
   ) {}
 
-  async execute(command: GetAllCardsInDeckCommand) {
+  async execute(command: GetAllCardsInDeckCommand): Promise<PaginatedCards> {
     const deck = await this.decksRepository.findDeckById(command.deckId)
 
     if (!deck) throw new NotFoundException(`Deck with id ${command.deckId} not found`)

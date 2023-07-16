@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { CreateCardDto } from '../../cards/dto'
+import { Card } from '../../cards/entities/cards.entity'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 
 export class CreateCardCommand {
@@ -21,7 +22,7 @@ export class CreateCardHandler implements ICommandHandler<CreateCardCommand> {
     private readonly fileUploadService: FileUploadService
   ) {}
 
-  async execute(command: CreateCardCommand) {
+  async execute(command: CreateCardCommand): Promise<Card> {
     let questionImg, answerImg
 
     if (command.questionImg && command.answerImg) {

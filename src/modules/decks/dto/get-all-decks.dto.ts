@@ -1,3 +1,4 @@
+import { ApiHideProperty } from '@nestjs/swagger'
 import { IsUUID } from 'class-validator'
 
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
@@ -10,15 +11,23 @@ export class GetAllDecksDto extends PaginationDto {
   @IsOptionalOrEmptyString()
   maxCardsCount?: string
 
+  /** Search by deck name */
   @IsOptionalOrEmptyString()
   name?: string
 
+  /** Filter by deck authorId */
   @IsOptionalOrEmptyString()
   @IsUUID(4)
   authorId?: string
 
-  userId: string
+  @ApiHideProperty()
+  userId?: string
 
+  /** A string that represents the name of the field to order by and the order direction.
+   * The format is: "field_name-order_direction".
+   * Available directions: "asc" and "desc".
+   * @example "name-desc"
+   * */
   @IsOrderBy()
   orderBy?: string | null
 }

@@ -4,6 +4,7 @@ import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import { GetAllDecksDto } from '../dto'
+import { Deck, PaginatedDecks } from '../entities/deck.entity'
 
 @Injectable()
 export class DecksRepository {
@@ -21,7 +22,7 @@ export class DecksRepository {
     userId: string
     cover?: string
     isPrivate?: boolean
-  }) {
+  }): Promise<Deck> {
     try {
       return await this.prisma.deck.create({
         data: {
@@ -34,6 +35,14 @@ export class DecksRepository {
           name,
           cover,
           isPrivate,
+        },
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
         },
       })
     } catch (e) {
@@ -51,9 +60,7 @@ export class DecksRepository {
     minCardsCount,
     maxCardsCount,
     orderBy,
-  }: GetAllDecksDto) {
-    console.log(minCardsCount)
-    console.log(Number(minCardsCount))
+  }: GetAllDecksDto): Promise<PaginatedDecks> {
     try {
       const where = {
         cardsCount: {
@@ -163,13 +170,21 @@ export class DecksRepository {
   public async updateDeckById(
     id: string,
     data: { name?: string; cover?: string; isPrivate?: boolean }
-  ) {
+  ): Promise<Deck> {
     try {
       return await this.prisma.deck.update({
         where: {
           id,
         },
         data,
+        include: {
+          author: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
       })
     } catch (e) {
       this.logger.error(e?.message)

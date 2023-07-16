@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { Prisma } from '@prisma/client'
 import { pick } from 'remeda'
 
+import { Card } from '../../cards/entities/cards.entity'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
@@ -19,7 +20,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
     private readonly decksRepository: DecksRepository
   ) {}
 
-  private async getSmartRandomCard(cards: Array<CardWithGrade>) {
+  private async getSmartRandomCard(cards: Array<CardWithGrade>): Promise<Card> {
     const selectionPool: Array<CardWithGrade> = []
 
     cards.forEach(card => {

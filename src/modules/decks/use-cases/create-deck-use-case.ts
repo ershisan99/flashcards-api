@@ -2,6 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { CreateDeckDto } from '../dto'
+import { Deck } from '../entities/deck.entity'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class CreateDeckCommand {
@@ -15,7 +16,7 @@ export class CreateDeckHandler implements ICommandHandler<CreateDeckCommand> {
     private readonly fileUploadService: FileUploadService
   ) {}
 
-  async execute(command: CreateDeckCommand) {
+  async execute(command: CreateDeckCommand): Promise<Deck> {
     let cover
 
     if (command.cover) {

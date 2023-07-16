@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { UpdateDeckDto } from '../dto'
+import { Deck } from '../entities/deck.entity'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class UpdateDeckCommand {
@@ -21,7 +22,7 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
     private readonly fileUploadService: FileUploadService
   ) {}
 
-  async execute(command: UpdateDeckCommand) {
+  async execute(command: UpdateDeckCommand): Promise<Deck> {
     const deck = await this.deckRepository.findDeckById(command.deckId)
 
     if (!deck) {

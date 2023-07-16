@@ -12,3 +12,10 @@ export class PaginationDto {
   @IsNumber()
   itemsPerPage?: number
 }
+
+export class Pagination {
+  currentPage: number
+  itemsPerPage: number
+  totalPages: number
+  totalItems: number
+}
