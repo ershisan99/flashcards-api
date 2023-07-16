@@ -11,7 +11,7 @@ export class DeleteCardByIdCommand {
 export class DeleteCardByIdHandler implements ICommandHandler<DeleteCardByIdCommand> {
   constructor(private readonly cardsRepository: CardsRepository) {}
 
-  async execute(command: DeleteCardByIdCommand) {
+  async execute(command: DeleteCardByIdCommand): Promise<void> {
     const card = await this.cardsRepository.findCardById(command.id)
 
     if (!card) throw new NotFoundException(`Card with id ${command.id} not found`)
@@ -19,6 +19,6 @@ export class DeleteCardByIdHandler implements ICommandHandler<DeleteCardByIdComm
       throw new BadRequestException(`You can't delete a card that you don't own`)
     }
 
-    return await this.cardsRepository.deleteCardById(command.id)
+    await this.cardsRepository.deleteCardById(command.id)
   }
 }

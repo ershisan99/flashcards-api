@@ -3,6 +3,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { UpdateCardDto } from '../dto'
+import { Card } from '../entities/cards.entity'
 import { CardsRepository } from '../infrastructure/cards.repository'
 
 export class UpdateCardCommand {
@@ -22,7 +23,7 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
     private readonly fileUploadService: FileUploadService
   ) {}
 
-  async execute(command: UpdateCardCommand) {
+  async execute(command: UpdateCardCommand): Promise<Card> {
     const card = await this.cardsRepository.findCardById(command.cardId)
 
     if (!card) throw new NotFoundException(`Card with id ${command.cardId} not found`)
