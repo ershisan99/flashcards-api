@@ -1,6 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { ForbiddenException, NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
+import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { DecksRepository } from '../infrastructure/decks.repository'
 import { GradesRepository } from '../infrastructure/grades.repository'
 
@@ -24,6 +25,7 @@ export class SaveGradeHandler implements ICommandHandler<SaveGradeCommand> {
 
   async execute(command: SaveGradeCommand) {
     const deck = await this.decksRepository.findDeckByCardId(command.args.cardId)
+
     if (!deck)
       throw new NotFoundException(`Deck containing card with id ${command.args.cardId} not found`)
 

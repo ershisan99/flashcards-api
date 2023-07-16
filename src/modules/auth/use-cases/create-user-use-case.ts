@@ -1,12 +1,14 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { UsersRepository } from '../../users/infrastructure/users.repository'
-import { CreateUserInput, UserViewType } from '../../../types/types'
 import { addHours } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
+
+import { CreateUserInput, UserViewType } from '../../../types/types'
+import { UsersRepository } from '../../users/infrastructure/users.repository'
 import { UsersService } from '../../users/services/users.service'
+import { RegistrationDto } from '../dto'
 
 export class CreateUserCommand {
-  constructor(public readonly user: { name: string; password: string; email: string }) {}
+  constructor(public readonly user: RegistrationDto) {}
 }
 
 @CommandHandler(CreateUserCommand)
@@ -29,6 +31,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       isEmailVerified: false,
     }
     const createdUser = await this.usersRepository.createUser(newUser)
+
     if (!createdUser) {
       return null
     }
@@ -37,6 +40,7 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
       name: createdUser.name,
       verificationToken: verificationToken,
     })
+
     return {
       id: createdUser.id,
       name: createdUser.name,

@@ -6,6 +6,7 @@ export class BaseAuthGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest()
     const exceptedAuthInput = 'Basic YWRtaW46cXdlcnR5'
+
     if (!request.headers || !request.headers.authorization) {
       throw new UnauthorizedException([{ message: 'No any auth headers' }])
     } else {
@@ -17,6 +18,7 @@ export class BaseAuthGuard implements CanActivate {
         ])
       }
     }
+
     return true
   }
 }

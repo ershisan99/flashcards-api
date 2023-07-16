@@ -1,7 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common'
-import { UsersRepository } from '../infrastructure/users.repository'
-import * as bcrypt from 'bcrypt'
 import { MailerService } from '@nestjs-modules/mailer'
+import * as bcrypt from 'bcrypt'
+
+import { UsersRepository } from '../infrastructure/users.repository'
 
 @Injectable()
 export class UsersService {
@@ -23,6 +24,7 @@ export class UsersService {
 
   async deleteAllUsers(): Promise<{ deleted: number }> {
     const deleted = await this.usersRepository.deleteAllUsers()
+
     return { deleted }
   }
 

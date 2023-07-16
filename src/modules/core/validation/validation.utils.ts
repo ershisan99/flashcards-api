@@ -1,7 +1,9 @@
-import { DomainResultNotification, ResultNotification } from './notification'
-import { validateOrReject } from 'class-validator'
 import { IEvent } from '@nestjs/cqrs'
+import { validateOrReject } from 'class-validator'
+
 import { validationErrorsMapper, ValidationPipeErrorType } from '../../../settings/pipes-setup'
+
+import { DomainResultNotification, ResultNotification } from './notification'
 
 export class DomainError extends Error {
   constructor(message: string, public resultNotification: ResultNotification) {
@@ -31,11 +33,14 @@ export const validateEntity = async <T extends object>(
     const resultNotification: DomainResultNotification<T> = mapErrorsToNotification<T>(
       validationErrorsMapper.mapValidationErrorArrayToValidationPipeErrorTypeArray(errors)
     )
+
     resultNotification.addData(entity)
     resultNotification.addEvents(...events)
+
     return resultNotification
   }
   const domainResultNotification = new DomainResultNotification<T>(entity)
+
   domainResultNotification.addEvents(...events)
 
   return domainResultNotification
@@ -43,8 +48,10 @@ export const validateEntity = async <T extends object>(
 
 export function mapErrorsToNotification<T>(errors: ValidationPipeErrorType[]) {
   const resultNotification = new DomainResultNotification<T>()
+
   errors.forEach((item: ValidationPipeErrorType) =>
     resultNotification.addError(item.message, item.field, 1)
   )
+
   return resultNotification
 }

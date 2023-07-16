@@ -10,13 +10,17 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
+import { CommandBus } from '@nestjs/cqrs'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import { ApiTags } from '@nestjs/swagger'
+
+import { JwtAuthGuard } from '../auth/guards'
+
 import { CardsService } from './cards.service'
 import { UpdateCardDto } from './dto'
-import { CommandBus } from '@nestjs/cqrs'
 import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateCardCommand } from './use-cases'
-import { JwtAuthGuard } from '../auth/guards'
-import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
+@ApiTags('Cards')
 @Controller('cards')
 export class CardsController {
   constructor(private readonly decksService: CardsService, private commandBus: CommandBus) {}

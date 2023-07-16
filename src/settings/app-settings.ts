@@ -42,4 +42,5 @@ export class AppSettings {
 }
 const env = new EnvironmentSettings((process.env.NODE_ENV || 'DEVELOPMENT') as EnvironmentsTypes)
 const auth = new AuthSettings(process.env)
+
 export const appSettings = new AppSettings(env, auth)

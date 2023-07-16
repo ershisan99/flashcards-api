@@ -14,6 +14,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     const req = context.switchToHttp().getRequest()
 
     const res: boolean = await (super.canActivate(context) as Promise<boolean>)
+
     if (!res) return false
 
     // check DTO

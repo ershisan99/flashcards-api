@@ -9,13 +9,16 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common'
-import { UsersService } from '../services/users.service'
-import { CreateUserDto } from '../dto/create-user.dto'
+import { CommandBus } from '@nestjs/cqrs'
+import { ApiTags } from '@nestjs/swagger'
+
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { BaseAuthGuard } from '../../auth/guards'
-import { CommandBus } from '@nestjs/cqrs'
 import { CreateUserCommand } from '../../auth/use-cases'
+import { CreateUserDto } from '../dto/create-user.dto'
+import { UsersService } from '../services/users.service'
 
+@ApiTags('Admin')
 @Controller('users')
 export class UsersController {
   constructor(private usersService: UsersService, private commandBus: CommandBus) {}
@@ -25,7 +28,9 @@ export class UsersController {
     const { page, pageSize } = Pagination.getPaginationData(query)
 
     const users = await this.usersService.getUsers(page, pageSize, query.name, query.email)
+
     if (!users) throw new NotFoundException('Users not found')
+
     return users
   }
 

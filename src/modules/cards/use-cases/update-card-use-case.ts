@@ -1,8 +1,9 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { CardsRepository } from '../infrastructure/cards.repository'
-import { UpdateCardDto } from '../dto/update-card.dto'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
+import { UpdateCardDto } from '../dto'
+import { CardsRepository } from '../infrastructure/cards.repository'
 
 export class UpdateCardCommand {
   constructor(
@@ -43,6 +44,7 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
       )
 
       const result = await Promise.all([addQuestionImagePromise, addAnswerImagePromise])
+
       questionImg = result[0].fileUrl
       answerImg = result[1].fileUrl
     } else if (command.answerImg) {
@@ -51,6 +53,7 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
         command.answerImg?.originalname
       )
       const result = await addAnswerImagePromise
+
       answerImg = result.fileUrl
     } else if (command.questionImg) {
       const addQuestionImagePromise = this.fileUploadService.uploadFile(
@@ -58,6 +61,7 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
         command.questionImg?.originalname
       )
       const result = await addQuestionImagePromise
+
       questionImg = result.fileUrl
     }
     if (command.card.questionImg === '') {
@@ -66,6 +70,7 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
     if (command.card.answerImg === '') {
       answerImg = null
     }
+
     return await this.cardsRepository.updateCardById(command.cardId, {
       ...command.card,
       answerImg,

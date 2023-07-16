@@ -1,15 +1,18 @@
 import { Inject, Injectable } from '@nestjs/common'
 import { PassportStrategy } from '@nestjs/passport'
-import { Strategy } from 'passport-jwt'
-import { UsersService } from '../../users/services/users.service'
-import { AppSettings } from '../../../settings/app-settings'
 import { Request } from 'express'
+import { Strategy } from 'passport-jwt'
+
+import { AppSettings } from '../../../settings/app-settings'
+import { UsersService } from '../../users/services/users.service'
 
 const cookieExtractor = function (req: Request) {
   let token = null
+
   if (req && req.cookies) {
     token = req.cookies['refreshToken']
   }
+
   return token
 }
 

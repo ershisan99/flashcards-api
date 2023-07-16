@@ -1,4 +1,5 @@
 import { isObject } from 'remeda'
+
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from './pagination.constants'
 
 export class Pagination {
@@ -17,6 +18,7 @@ export class Pagination {
       !isNaN(Number(query.itemsPerPage))
         ? +query.itemsPerPage
         : DEFAULT_PAGE_SIZE
+
     return { currentPage, itemsPerPage, ...query }
   }
 
@@ -31,6 +33,7 @@ export class Pagination {
     }
   ) {
     const totalPages = Math.ceil(count / itemsPerPage)
+
     return {
       pagination: {
         totalPages,

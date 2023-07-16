@@ -1,13 +1,15 @@
-import { NestFactory } from '@nestjs/core'
-import { AppModule } from './app.module'
 import { Logger } from '@nestjs/common'
-import { HttpExceptionFilter } from './exception.filter'
-import * as cookieParser from 'cookie-parser'
+import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
+import * as cookieParser from 'cookie-parser'
+
+import { AppModule } from './app.module'
+import { HttpExceptionFilter } from './exception.filter'
 import { pipesSetup } from './settings/pipes-setup'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
+
   app.enableCors({
     origin: true,
     credentials: true,
@@ -19,13 +21,19 @@ async function bootstrap() {
     .setTitle('Flashcards')
     .setDescription('The config API description')
     .setVersion('1.0')
+    .addTag('Auth')
+    .addTag('Decks')
+    .addTag('Cards')
+    .addTag('Admin')
     .build()
   const document = SwaggerModule.createDocument(app, config)
+
   SwaggerModule.setup('docs', app, document)
   pipesSetup(app)
   app.useGlobalFilters(new HttpExceptionFilter())
   await app.listen(process.env.PORT || 3000)
   const logger = new Logger('NestApplication')
+
   logger.log(`Application is running on: ${await app.getUrl()}`)
 }
 

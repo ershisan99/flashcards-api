@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common'
-import { UsersService } from './services/users.service'
+import { CqrsModule } from '@nestjs/cqrs'
+
 import { UsersController } from './api/users.controller'
 import { UsersRepository } from './infrastructure/users.repository'
-import { CqrsModule } from '@nestjs/cqrs'
+import { UsersService } from './services/users.service'
 
 @Module({
   imports: [CqrsModule],

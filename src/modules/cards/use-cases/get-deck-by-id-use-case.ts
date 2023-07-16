@@ -1,4 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
 import { CardsRepository } from '../infrastructure/cards.repository'
 
 export class GetDeckByIdCommand {

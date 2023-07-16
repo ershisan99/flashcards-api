@@ -1,10 +1,12 @@
+import * as process from 'process'
+
 import { Injectable } from '@nestjs/common'
+import * as bcrypt from 'bcrypt'
 import { addDays } from 'date-fns'
 import * as jwt from 'jsonwebtoken'
-import * as bcrypt from 'bcrypt'
-import { UsersRepository } from '../users/infrastructure/users.repository'
-import * as process from 'process'
+
 import { PrismaService } from '../../prisma.service'
+import { UsersRepository } from '../users/infrastructure/users.repository'
 
 @Injectable()
 export class AuthService {
@@ -21,6 +23,7 @@ export class AuthService {
     const refreshToken = jwt.sign(payload, refreshSecretKey, {
       expiresIn: '30d',
     })
+
     await this.prisma.refreshToken.create({
       data: {
         userId: userId,
@@ -29,6 +32,7 @@ export class AuthService {
         isRevoked: false,
       },
     })
+
     return {
       accessToken,
       refreshToken,
@@ -37,6 +41,7 @@ export class AuthService {
 
   async checkCredentials(email: string, password: string) {
     const user = await this.usersRepository.findUserByEmail(email)
+
     if (!user /*|| !user.emailConfirmation.isConfirmed*/)
       return {
         resultCode: 1,
@@ -46,6 +51,7 @@ export class AuthService {
         },
       }
     const isPasswordValid = await this.isPasswordCorrect(password, user.password)
+
     if (!isPasswordValid) {
       return {
         resultCode: 1,
@@ -58,6 +64,7 @@ export class AuthService {
       }
     }
     const tokensPair = await this.createJwtTokensPair(user.id)
+
     return {
       resultCode: 0,
       data: tokensPair,

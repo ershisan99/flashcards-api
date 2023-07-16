@@ -1,6 +1,7 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { CardsRepository } from '../infrastructure/cards.repository'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
+import { CardsRepository } from '../infrastructure/cards.repository'
 
 export class DeleteCardByIdCommand {
   constructor(public readonly id: string, public readonly userId: string) {}
@@ -12,10 +13,12 @@ export class DeleteCardByIdHandler implements ICommandHandler<DeleteCardByIdComm
 
   async execute(command: DeleteCardByIdCommand) {
     const card = await this.cardsRepository.findCardById(command.id)
+
     if (!card) throw new NotFoundException(`Card with id ${command.id} not found`)
     if (card.userId !== command.userId) {
       throw new BadRequestException(`You can't delete a card that you don't own`)
     }
+
     return await this.cardsRepository.deleteCardById(command.id)
   }
 }

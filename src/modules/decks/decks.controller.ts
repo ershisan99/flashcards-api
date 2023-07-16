@@ -13,9 +13,16 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common'
+import { CommandBus } from '@nestjs/cqrs'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
+import { ApiTags } from '@nestjs/swagger'
+
+import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
+import { JwtAuthGuard } from '../auth/guards'
+import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
+
 import { DecksService } from './decks.service'
 import { UpdateDeckDto, CreateDeckDto, GetAllDecksDto } from './dto'
-import { CommandBus } from '@nestjs/cqrs'
 import {
   CreateDeckCommand,
   DeleteDeckByIdCommand,
@@ -27,11 +34,8 @@ import {
   SaveGradeCommand,
   CreateCardCommand,
 } from './use-cases'
-import { JwtAuthGuard } from '../auth/guards'
-import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
-import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
-import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
+@ApiTags('Decks')
 @Controller('decks')
 export class DecksController {
   constructor(private readonly decksService: DecksService, private commandBus: CommandBus) {}
@@ -48,6 +52,7 @@ export class DecksController {
     @Body() createDeckDto: CreateDeckDto
   ) {
     const userId = req.user.id
+
     return this.commandBus.execute(
       new CreateDeckCommand({ ...createDeckDto, userId: userId }, files?.cover?.[0])
     )
@@ -57,6 +62,7 @@ export class DecksController {
   @Get()
   findAll(@Query() query: GetAllDecksDto, @Req() req) {
     const finalQuery = Pagination.getPaginationData(query)
+
     return this.commandBus.execute(new GetAllDecksCommand({ ...finalQuery, userId: req.user.id }))
   }
 
@@ -70,6 +76,7 @@ export class DecksController {
   @Get(':id/cards')
   findCardsInDeck(@Param('id') id: string, @Req() req, @Query() query: GetAllCardsInDeckDto) {
     const finalQuery = Pagination.getPaginationData(query)
+
     return this.commandBus.execute(new GetAllCardsInDeckCommand(req.user.id, id, finalQuery))
   }
 

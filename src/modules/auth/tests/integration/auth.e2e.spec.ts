@@ -1,8 +1,9 @@
+import { HttpStatus } from '@nestjs/common'
 import { Test, TestingModule } from '@nestjs/testing'
 import * as request from 'supertest'
-import { HttpStatus } from '@nestjs/common'
+
 import { AppModule } from '../../../../app.module'
-import { RegistrationDto } from '../../dto/registration.dto'
+import { RegistrationDto } from '../../dto'
 
 describe('AuthController (e2e)', () => {
   let app

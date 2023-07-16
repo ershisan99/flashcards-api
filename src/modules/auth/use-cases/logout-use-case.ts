@@ -1,7 +1,8 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { Logger } from '@nestjs/common'
-import { UsersRepository } from '../../users/infrastructure/users.repository'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import jwt from 'jsonwebtoken'
+
+import { UsersRepository } from '../../users/infrastructure/users.repository'
 
 export class LogoutCommand {
   constructor(public readonly refreshToken: string) {}
@@ -17,13 +18,18 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
     const token = command.refreshToken
 
     const secretKey = process.env.JWT_SECRET_KEY
+
     if (!secretKey) throw new Error('JWT_SECRET_KEY is not defined')
 
     try {
       const decoded: any = jwt.verify(token, secretKey)
-      return this.usersRepository.revokeToken(decoded.userId, token)
+
+      await this.usersRepository.revokeToken(decoded.userId, token)
+
+      return null
     } catch (e) {
       this.logger.log(`Decoding error: ${e}`)
+
       return null
     }
   }

@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { AuthRepository } from '../infrastructure/auth.repository'
-import * as jwt from 'jsonwebtoken'
 import { addDays } from 'date-fns'
+import * as jwt from 'jsonwebtoken'
+
+import { AuthRepository } from '../infrastructure/auth.repository'
 
 export class RefreshTokenCommand {
   constructor(public readonly userId: string) {}
@@ -26,7 +27,9 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       expiresIn: '30d',
     })
     const expiresIn = addDays(new Date(), 30)
+
     await this.authRepository.createRefreshToken(userId, refreshToken, expiresIn)
+
     return {
       accessToken,
       refreshToken,

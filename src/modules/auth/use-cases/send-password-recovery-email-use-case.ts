@@ -1,8 +1,9 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+import { v4 as uuidv4 } from 'uuid'
+
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 import { UsersService } from '../../users/services/users.service'
-import { v4 as uuidv4 } from 'uuid'
 
 export class SendPasswordRecoveryEmailCommand {
   constructor(public readonly email: string) {}

@@ -1,5 +1,5 @@
-import { IsBoolean, IsOptional, Length } from 'class-validator'
 import { Transform } from 'class-transformer'
+import { IsBoolean, IsOptional, Length } from 'class-validator'
 
 export class CreateDeckDto {
   @Length(3, 30)

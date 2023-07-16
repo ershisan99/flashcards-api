@@ -1,21 +1,22 @@
 import {
+  BadRequestException,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common'
+import { Prisma } from '@prisma/client'
+import { addHours } from 'date-fns'
+import { v4 as uuidv4 } from 'uuid'
+
+import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
+import { PrismaService } from '../../../prisma.service'
+import {
   CreateUserInput,
   EntityWithPaginationType,
   User,
   UserViewType,
   VerificationWithUser,
 } from '../../../types/types'
-import {
-  BadRequestException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common'
-import { addHours } from 'date-fns'
-import { v4 as uuidv4 } from 'uuid'
-import { PrismaService } from '../../../prisma.service'
-import { Prisma } from '@prisma/client'
-import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 
 @Injectable()
 export class UsersRepository {
@@ -52,6 +53,7 @@ export class UsersRepository {
           take: itemsPerPage,
         }),
       ])
+
       return Pagination.transformPaginationData(res, { currentPage, itemsPerPage })
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -100,6 +102,7 @@ export class UsersRepository {
           id,
         },
       })
+
       return result.isDeleted
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -115,6 +118,7 @@ export class UsersRepository {
   async deleteAllUsers(): Promise<number> {
     try {
       const result = await this.prisma.user.deleteMany()
+
       return result.count
     } catch (e) {
       this.logger.error(e?.message || e)
@@ -128,6 +132,7 @@ export class UsersRepository {
         where: { id },
         include,
       })
+
       if (!user) {
         return null
       }
@@ -154,6 +159,7 @@ export class UsersRepository {
       if (!user) {
         return null
       }
+
       return user
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -176,9 +182,11 @@ export class UsersRepository {
           user: true,
         },
       })
+
       if (!verification) {
         return null
       }
+
       return verification
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -206,6 +214,7 @@ export class UsersRepository {
           },
         },
       })
+
       return result.isEmailVerified
     } catch (e) {
       this.logger.error(e?.message || e)
@@ -276,9 +285,11 @@ export class UsersRepository {
           user: true,
         },
       })
+
       if (!resetPassword) {
         return null
       }
+
       return resetPassword.user
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError) {
@@ -335,9 +346,11 @@ export class UsersRepository {
           user: true,
         },
       })
+
       if (!revokedToken.user) {
         return null
       }
+
       return revokedToken.user
     } catch (e) {
       this.logger.error(e?.message || e)

@@ -1,0 +1,6 @@
+export * from './email-verification.dto'
+export * from './login.dto'
+export * from './recover-password.dto'
+export * from './registration.dto'
+export * from './resend-verification-email.dto'
+export * from './update-auth.dto'

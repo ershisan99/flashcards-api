@@ -1,7 +1,8 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { UserViewType } from '../../../types/types'
 import { UnauthorizedException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { pick } from 'remeda'
+
+import { UserViewType } from '../../../types/types'
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 
 export class GetCurrentUserDataCommand {
@@ -17,6 +18,6 @@ export class GetCurrentUserDataHandler implements ICommandHandler<GetCurrentUser
 
     if (!user) throw new UnauthorizedException()
 
-    return pick(user, ['email', 'name', 'id', 'isEmailVerified', 'avatar'])
+    return pick(user, ['email', 'name', 'id', 'isEmailVerified', 'avatar', 'created', 'updated'])
   }
 }

@@ -1,7 +1,13 @@
 import { Module } from '@nestjs/common'
-import { DecksService } from './decks.service'
-import { DecksController } from './decks.controller'
 import { CqrsModule } from '@nestjs/cqrs'
+
+import { FileUploadService } from '../../infrastructure/file-upload-service/file-upload.service'
+import { CardsRepository } from '../cards/infrastructure/cards.repository'
+
+import { DecksController } from './decks.controller'
+import { DecksService } from './decks.service'
+import { DecksRepository } from './infrastructure/decks.repository'
+import { GradesRepository } from './infrastructure/grades.repository'
 import {
   CreateDeckHandler,
   DeleteDeckByIdHandler,
@@ -13,10 +19,6 @@ import {
   SaveGradeHandler,
   GetRandomCardInDeckHandler,
 } from './use-cases'
-import { DecksRepository } from './infrastructure/decks.repository'
-import { CardsRepository } from '../cards/infrastructure/cards.repository'
-import { GradesRepository } from './infrastructure/grades.repository'
-import { FileUploadService } from '../../infrastructure/file-upload-service/file-upload.service'
 
 const commandHandlers = [
   CreateDeckHandler,

@@ -1,6 +1,7 @@
 import { IsUUID } from 'class-validator'
-import { IsOptionalOrEmptyString, IsOrderBy } from '../../../infrastructure/decorators'
+
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
+import { IsOptionalOrEmptyString, IsOrderBy } from '../../../infrastructure/decorators'
 
 export class GetAllDecksDto extends PaginationDto {
   @IsOptionalOrEmptyString()

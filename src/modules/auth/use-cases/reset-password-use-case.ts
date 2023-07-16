@@ -1,5 +1,6 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 import { UsersService } from '../../users/services/users.service'
 

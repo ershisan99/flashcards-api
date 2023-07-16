@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common'
-import { AuthService } from './auth.service'
-import { AuthController } from './auth.controller'
-import { UsersModule } from '../users/users.module'
-import { LocalStrategy } from './strategies/local.strategy'
 import { CqrsModule } from '@nestjs/cqrs'
+
+import { UsersModule } from '../users/users.module'
+
+import { AuthController } from './auth.controller'
+import { AuthService } from './auth.service'
+import { AuthRepository } from './infrastructure/auth.repository'
+import { LocalStrategy } from './strategies/local.strategy'
 import {
   CreateUserHandler,
   GetCurrentUserDataHandler,
@@ -14,7 +17,6 @@ import {
   SendPasswordRecoveryEmailHandler,
   VerifyEmailHandler,
 } from './use-cases'
-import { AuthRepository } from './infrastructure/auth.repository'
 
 const commandHandlers = [
   CreateUserHandler,

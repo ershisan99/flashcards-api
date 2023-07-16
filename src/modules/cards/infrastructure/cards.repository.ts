@@ -1,10 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
-import { PrismaService } from '../../../prisma.service'
-import { GetAllCardsInDeckDto } from '../dto/get-all-cards.dto'
-import { CreateCardDto } from '../dto/create-card.dto'
-import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
+
 import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
-import { UpdateCardDto } from '../dto/update-card.dto'
+import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
+import { PrismaService } from '../../../prisma.service'
+import { CreateCardDto, GetAllCardsInDeckDto, UpdateCardDto } from '../dto'
 
 @Injectable()
 export class CardsRepository {
@@ -31,6 +30,7 @@ export class CardsRepository {
             ...card,
           },
         })
+
         await tx.deck.update({
           where: {
             id: deckId,
@@ -41,6 +41,7 @@ export class CardsRepository {
             },
           },
         })
+
         return created
       })
     } catch (e) {
@@ -80,6 +81,7 @@ export class CardsRepository {
           take: itemsPerPage,
         }),
       ])
+
       return Pagination.transformPaginationData(result, { currentPage, itemsPerPage })
     } catch (e) {
       this.logger.error(e?.message)
@@ -129,6 +131,7 @@ export class CardsRepository {
             id,
           },
         })
+
         await tx.deck.update({
           where: {
             id: deleted.deckId,
@@ -139,6 +142,7 @@ export class CardsRepository {
             },
           },
         })
+
         return deleted
       })
     } catch (e) {

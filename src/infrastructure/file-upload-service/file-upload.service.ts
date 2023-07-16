@@ -1,7 +1,8 @@
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 import { Injectable } from '@nestjs/common'
 import { v4 as uuid } from 'uuid'
+
 import { PrismaService } from '../../prisma.service'
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
 
 @Injectable()
 export class FileUploadService {

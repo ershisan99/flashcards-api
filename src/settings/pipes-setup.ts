@@ -7,6 +7,7 @@ export const validationErrorsMapper = {
   ): ValidationPipeErrorType[] {
     return errors.flatMap(error => {
       const constraints = error.constraints ?? []
+
       return Object.entries(constraints).map(([_, value]) => ({
         field: error.property,
         message: value,
@@ -26,6 +27,7 @@ export function pipesSetup(app: INestApplication) {
       exceptionFactory: (errors: ValidationError[]) => {
         const err =
           validationErrorsMapper.mapValidationErrorArrayToValidationPipeErrorTypeArray(errors)
+
         throw new BadRequestException(err)
       },
     })

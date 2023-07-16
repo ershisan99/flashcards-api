@@ -1,5 +1,6 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 import { UsersService } from '../../users/services/users.service'
 
@@ -28,6 +29,7 @@ export class ResendVerificationEmailHandler
     }
 
     const updatedUser = await this.usersRepository.updateVerificationToken(user.id)
+
     await this.usersService.sendConfirmationEmail({
       email: updatedUser.user.email,
       name: updatedUser.user.name,

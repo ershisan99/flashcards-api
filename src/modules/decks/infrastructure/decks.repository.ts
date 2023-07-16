@@ -1,8 +1,9 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
+
+import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
+import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import { GetAllDecksDto } from '../dto'
-import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
-import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
 
 @Injectable()
 export class DecksRepository {
@@ -103,6 +104,7 @@ export class DecksRepository {
         this.prisma
           .$queryRaw`SELECT MAX(card_count) as maxCardsCount FROM (SELECT COUNT(*) as card_count FROM card GROUP BY deckId) AS card_counts;`,
       ])
+
       return {
         maxCardsCount: Number(max[0].maxCardsCount),
         ...Pagination.transformPaginationData([count, items], { currentPage, itemsPerPage }),

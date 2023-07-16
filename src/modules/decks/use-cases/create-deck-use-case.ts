@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
+import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { CreateDeckDto } from '../dto'
 import { DecksRepository } from '../infrastructure/decks.repository'
-import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 
 export class CreateDeckCommand {
   constructor(public readonly deck: CreateDeckDto, public readonly cover: Express.Multer.File) {}
@@ -22,6 +23,7 @@ export class CreateDeckHandler implements ICommandHandler<CreateDeckCommand> {
         command.cover.buffer,
         command.cover.originalname
       )
+
       cover = result.fileUrl
     }
 

@@ -1,8 +1,9 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { DecksRepository } from '../infrastructure/decks.repository'
-import { UpdateDeckDto } from '../dto'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
+import { UpdateDeckDto } from '../dto'
+import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class UpdateDeckCommand {
   constructor(
@@ -22,6 +23,7 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
 
   async execute(command: UpdateDeckCommand) {
     const deck = await this.deckRepository.findDeckById(command.deckId)
+
     if (!deck) {
       throw new NotFoundException(`Deck with id ${command.deckId} not found`)
     }
@@ -36,10 +38,12 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
         command.cover.buffer,
         command.cover.originalname
       )
+
       cover = result.fileUrl
     } else if (command.deck.cover === '') {
       cover = null
     }
+
     return await this.deckRepository.updateDeckById(command.deckId, { ...command.deck, cover })
   }
 }

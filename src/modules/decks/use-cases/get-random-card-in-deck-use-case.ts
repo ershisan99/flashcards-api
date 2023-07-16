@@ -1,9 +1,10 @@
-import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { ForbiddenException, NotFoundException } from '@nestjs/common'
-import { DecksRepository } from '../infrastructure/decks.repository'
+import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { Prisma } from '@prisma/client'
 import { pick } from 'remeda'
+
+import { CardsRepository } from '../../cards/infrastructure/cards.repository'
+import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class GetRandomCardInDeckCommand {
   constructor(public readonly userId: string, public readonly deckId: string) {}
@@ -20,6 +21,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
 
   private async getSmartRandomCard(cards: Array<CardWithGrade>) {
     const selectionPool: Array<CardWithGrade> = []
+
     cards.forEach(card => {
       // Calculate the average grade for the card
       const averageGrade =
@@ -40,6 +42,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
 
   async execute(command: GetRandomCardInDeckCommand) {
     const deck = await this.decksRepository.findDeckById(command.deckId)
+
     if (!deck) throw new NotFoundException(`Deck with id ${command.deckId} not found`)
 
     if (deck.userId !== command.userId && deck.isPrivate) {
@@ -51,6 +54,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
       command.deckId
     )
     const smartRandomCard = await this.getSmartRandomCard(cards)
+
     return pick(smartRandomCard, ['id', 'question', 'answer', 'deckId'])
   }
 }

@@ -1,7 +1,8 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
+
+import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { CreateCardDto } from '../../cards/dto'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
-import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 
 export class CreateCardCommand {
   constructor(
@@ -34,6 +35,7 @@ export class CreateCardHandler implements ICommandHandler<CreateCardCommand> {
       )
 
       const result = await Promise.all([addQuestionImagePromise, addAnswerImagePromise])
+
       questionImg = result[0].fileUrl
       answerImg = result[1].fileUrl
     } else if (command.answerImg) {
@@ -42,6 +44,7 @@ export class CreateCardHandler implements ICommandHandler<CreateCardCommand> {
         command.answerImg?.originalname
       )
       const result = await addAnswerImagePromise
+
       answerImg = result.fileUrl
     } else if (command.questionImg) {
       const addQuestionImagePromise = this.fileUploadService.uploadFile(
@@ -49,6 +52,7 @@ export class CreateCardHandler implements ICommandHandler<CreateCardCommand> {
         command.questionImg?.originalname
       )
       const result = await addQuestionImagePromise
+
       questionImg = result.fileUrl
     }
     if (command.card.questionImg === '') {

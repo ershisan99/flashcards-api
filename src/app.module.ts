@@ -1,16 +1,18 @@
+import * as process from 'process'
+
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
-import { JwtStrategy } from './modules/auth/strategies/jwt.strategy'
-import { ConfigModule } from './settings/config.module'
+import { CqrsModule } from '@nestjs/cqrs'
+import { MailerModule } from '@nestjs-modules/mailer'
+
+import { FileUploadService } from './infrastructure/file-upload-service/file-upload.service'
 import { AuthModule } from './modules/auth/auth.module'
+import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strategy'
+import { JwtStrategy } from './modules/auth/strategies/jwt.strategy'
+import { CardsModule } from './modules/cards/cards.module'
+import { DecksModule } from './modules/decks/decks.module'
 import { UsersModule } from './modules/users/users.module'
 import { PrismaModule } from './prisma.module'
-import { MailerModule } from '@nestjs-modules/mailer'
-import * as process from 'process'
-import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strategy'
-import { CqrsModule } from '@nestjs/cqrs'
-import { DecksModule } from './modules/decks/decks.module'
-import { CardsModule } from './modules/cards/cards.module'
-import { FileUploadService } from './infrastructure/file-upload-service/file-upload.service'
+import { ConfigModule } from './settings/config.module'
 
 @Module({
   imports: [
