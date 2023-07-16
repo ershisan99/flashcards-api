@@ -9,7 +9,9 @@ import {
   Query,
   Req,
   Request,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common'
 import { DecksService } from './decks.service'
 import { CreateDeckDto } from './dto/create-deck.dto'
@@ -31,6 +33,7 @@ import { CreateCardDto } from '../cards/dto/create-card.dto'
 import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
 import { GetRandomCardInDeckCommand } from './use-cases/get-random-card-in-deck-use-case'
 import { SaveGradeCommand } from './use-cases/save-grade-use-case'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
 @Controller('decks')
 export class DecksController {
@@ -62,11 +65,13 @@ export class DecksController {
     const finalQuery = Pagination.getPaginationData(query)
     return this.commandBus.execute(new GetAllCardsInDeckCommand(req.user.id, id, finalQuery))
   }
+
   @UseGuards(JwtAuthGuard)
   @Get(':id/learn')
   findRandomCardInDeck(@Param('id') id: string, @Req() req) {
     return this.commandBus.execute(new GetRandomCardInDeckCommand(req.user.id, id))
   }
+
   @UseGuards(JwtAuthGuard)
   @Post(':id/learn')
   saveGrade(@Param('id') id: string, @Req() req, @Body() body: any) {
@@ -74,10 +79,25 @@ export class DecksController {
       new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
     )
   }
+
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'questionImg', maxCount: 1 },
+      { name: 'answerImg', maxCount: 1 },
+    ])
+  )
   @Post(':id/cards')
-  createCardInDeck(@Param('id') id: string, @Req() req, @Body() card: CreateCardDto) {
-    return this.commandBus.execute(new CreateCardCommand(req.user.id, id, card))
+  createCardInDeck(
+    @Param('id') id: string,
+    @Req() req,
+    @UploadedFiles()
+    files: { questionImg: Express.Multer.File[]; answerImg: Express.Multer.File[] },
+    @Body() card: CreateCardDto
+  ) {
+    return this.commandBus.execute(
+      new CreateCardCommand(req.user.id, id, card, files.answerImg?.[0], files.questionImg?.[0])
+    )
   }
 
   @UseGuards(JwtAuthGuard)

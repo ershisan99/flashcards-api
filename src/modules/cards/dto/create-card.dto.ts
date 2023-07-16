@@ -8,11 +8,11 @@ export class CreateCardDto {
   answer: string
 
   @IsOptional()
-  @Length(3, 500)
+  @Length(0, 0)
   questionImg?: string
 
   @IsOptional()
-  @Length(3, 500)
+  @Length(0, 0)
   answerImg?: string
 
   @IsOptional()

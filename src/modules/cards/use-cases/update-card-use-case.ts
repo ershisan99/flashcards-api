@@ -30,27 +30,41 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
       throw new BadRequestException(`You can't change a card that you don't own`)
     }
 
-    const addQuestionImagePromise = this.fileUploadService.uploadFile(
-      command.questionImg.buffer,
-      command.questionImg.originalname
-    )
-    const addAnswerImagePromise = this.fileUploadService.uploadFile(
-      command.answerImg.buffer,
-      command.answerImg.originalname
-    )
-
     let questionImg, answerImg
 
     if (command.questionImg && command.answerImg) {
+      const addQuestionImagePromise = this.fileUploadService.uploadFile(
+        command.questionImg?.buffer,
+        command.questionImg?.originalname
+      )
+      const addAnswerImagePromise = this.fileUploadService.uploadFile(
+        command.answerImg?.buffer,
+        command.answerImg?.originalname
+      )
+
       const result = await Promise.all([addQuestionImagePromise, addAnswerImagePromise])
       questionImg = result[0].fileUrl
       answerImg = result[1].fileUrl
     } else if (command.answerImg) {
+      const addAnswerImagePromise = this.fileUploadService.uploadFile(
+        command.answerImg?.buffer,
+        command.answerImg?.originalname
+      )
       const result = await addAnswerImagePromise
       answerImg = result.fileUrl
     } else if (command.questionImg) {
+      const addQuestionImagePromise = this.fileUploadService.uploadFile(
+        command.questionImg?.buffer,
+        command.questionImg?.originalname
+      )
       const result = await addQuestionImagePromise
       questionImg = result.fileUrl
+    }
+    if (command.card.questionImg === '') {
+      questionImg = null
+    }
+    if (command.card.answerImg === '') {
+      answerImg = null
     }
     return await this.cardsRepository.updateCardById(command.cardId, {
       ...command.card,

@@ -16,6 +16,7 @@ import { CardsRepository } from '../cards/infrastructure/cards.repository'
 import { GetRandomCardInDeckHandler } from './use-cases/get-random-card-in-deck-use-case'
 import { GradesRepository } from './infrastructure/grades.repository'
 import { SaveGradeHandler } from './use-cases/save-grade-use-case'
+import { FileUploadService } from '../../infrastructure/file-upload-service/file-upload.service'
 
 const commandHandlers = [
   CreateDeckHandler,
@@ -32,7 +33,14 @@ const commandHandlers = [
 @Module({
   imports: [CqrsModule],
   controllers: [DecksController],
-  providers: [DecksService, DecksRepository, CardsRepository, GradesRepository, ...commandHandlers],
+  providers: [
+    DecksService,
+    DecksRepository,
+    CardsRepository,
+    GradesRepository,
+    FileUploadService,
+    ...commandHandlers,
+  ],
   exports: [CqrsModule],
 })
 export class DecksModule {}

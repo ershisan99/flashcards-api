@@ -42,10 +42,8 @@ export class CardsController {
     files: { questionImg: Express.Multer.File[]; answerImg: Express.Multer.File[] },
     @Body() body: UpdateCardDto
   ) {
-    console.log({ body })
-    console.log(files)
     return this.commandBus.execute(
-      new UpdateCardCommand(id, body, req.user.id, files.answerImg[0], files.questionImg[0])
+      new UpdateCardCommand(id, body, req.user.id, files.answerImg?.[0], files.questionImg?.[0])
     )
   }
 
