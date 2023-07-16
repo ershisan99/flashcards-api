@@ -9,7 +9,6 @@ import {
 @ValidatorConstraint({ async: false })
 export class IsOrderByConstraint implements ValidatorConstraintInterface {
   validate(orderBy: string | null, args: ValidationArguments) {
-    console.log(orderBy)
     if (!orderBy || orderBy === 'null' || orderBy === '') {
       return true
     }
