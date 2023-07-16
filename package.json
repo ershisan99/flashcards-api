@@ -24,6 +24,7 @@
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.370.0",
     "@aws-sdk/client-ses": "^3.350.0",
     "@aws-sdk/credential-provider-node": "^3.350.0",
     "@nestjs-modules/mailer": "^1.8.1",
@@ -39,6 +40,7 @@
     "@nestjs/swagger": "^6.3.0",
     "@prisma/client": "^5.0.0",
     "@types/passport-local": "^1.0.35",
+    "aws-sdk": "^2.1415.0",
     "bcrypt": "^5.1.0",
     "class-transformer": "0.3.1",
     "class-validator": "^0.14.0",

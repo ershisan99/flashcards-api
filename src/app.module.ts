@@ -10,7 +10,7 @@ import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strate
 import { CqrsModule } from '@nestjs/cqrs'
 import { DecksModule } from './modules/decks/decks.module'
 import { CardsModule } from './modules/cards/cards.module'
-import { LoggerMiddleware } from './infrastructure/middlewares/logs-middleware'
+import { FileUploadService } from './infrastructure/file-upload-service/file-upload.service'
 
 @Module({
   imports: [
@@ -21,7 +21,6 @@ import { LoggerMiddleware } from './infrastructure/middlewares/logs-middleware'
     DecksModule,
     CardsModule,
     PrismaModule,
-
     MailerModule.forRoot({
       transport: {
         host: process.env.AWS_SES_SMTP_HOST,
@@ -35,8 +34,8 @@ import { LoggerMiddleware } from './infrastructure/middlewares/logs-middleware'
     }),
   ],
   controllers: [],
-  providers: [JwtStrategy, JwtRefreshStrategy],
-  exports: [CqrsModule],
+  providers: [JwtStrategy, JwtRefreshStrategy, FileUploadService],
+  exports: [CqrsModule, FileUploadService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -13,7 +13,7 @@ import {
 import { CardsService } from './cards.service'
 import { UpdateCardDto } from './dto/update-card.dto'
 import { CommandBus } from '@nestjs/cqrs'
-import { DeleteCardByIdCommand, GetDeckByIdCommand } from './use-cases'
+import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateCardCommand } from './use-cases'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
@@ -44,7 +44,9 @@ export class CardsController {
   ) {
     console.log({ body })
     console.log(files)
-    // return this.commandBus.execute(new UpdateCardCommand(id, body, req.user.id))
+    return this.commandBus.execute(
+      new UpdateCardCommand(id, body, req.user.id, files.answerImg[0], files.questionImg[0])
+    )
   }
 
   @UseGuards(JwtAuthGuard)

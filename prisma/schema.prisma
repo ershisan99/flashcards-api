@@ -154,3 +154,12 @@ model GeneralChatMessage {
 
   @@index([userId])
 }
+
+model fileEntity {
+  id        Int      @id @default(autoincrement())
+  fileName  String
+  fileUrl   String
+  key       String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
