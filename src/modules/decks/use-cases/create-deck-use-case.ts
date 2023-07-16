@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { CreateDeckDto } from '../dto/create-deck.dto'
+import { CreateDeckDto } from '../dto'
 import { DecksRepository } from '../infrastructure/decks.repository'
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 

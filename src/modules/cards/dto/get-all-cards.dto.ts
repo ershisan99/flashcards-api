@@ -1,7 +1,6 @@
 import { Length } from 'class-validator'
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
-import { IsOptionalOrEmptyString } from '../../../infrastructure/decorators/is-optional-or-empty-string'
-import { IsOrderBy } from '../../../infrastructure/decorators/is-order-by-constraint'
+import { IsOptionalOrEmptyString, IsOrderBy } from '../../../infrastructure/decorators'
 
 export class GetAllCardsInDeckDto extends PaginationDto {
   @IsOptionalOrEmptyString()

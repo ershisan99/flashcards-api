@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { DecksRepository } from '../infrastructure/decks.repository'
-import { GetAllDecksDto } from '../dto/get-all-decks.dto'
+import { GetAllDecksDto } from '../dto'
 
 export class GetAllDecksCommand {
   constructor(public readonly params: GetAllDecksDto) {}

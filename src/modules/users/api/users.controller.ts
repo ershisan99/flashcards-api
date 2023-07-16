@@ -12,7 +12,7 @@ import {
 import { UsersService } from '../services/users.service'
 import { CreateUserDto } from '../dto/create-user.dto'
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
-import { BaseAuthGuard } from '../../auth/guards/base-auth.guard'
+import { BaseAuthGuard } from '../../auth/guards'
 import { CommandBus } from '@nestjs/cqrs'
 import { CreateUserCommand } from '../../auth/use-cases'
 

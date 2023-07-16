@@ -1,4 +1,5 @@
 import { isObject } from 'remeda'
+import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from './pagination.constants'
 
 export class Pagination {
   static getPaginationData<T>(query: T) {
@@ -9,13 +10,13 @@ export class Pagination {
       typeof query.currentPage === 'string' &&
       !isNaN(Number(query.currentPage))
         ? +query.currentPage
-        : 1
+        : DEFAULT_PAGE_NUMBER
     const itemsPerPage =
       'itemsPerPage' in query &&
       typeof query.itemsPerPage === 'string' &&
       !isNaN(Number(query.itemsPerPage))
         ? +query.itemsPerPage
-        : 10
+        : DEFAULT_PAGE_SIZE
     return { currentPage, itemsPerPage, ...query }
   }
 

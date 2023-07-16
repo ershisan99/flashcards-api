@@ -13,11 +13,9 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { RegistrationDto } from './dto/registration.dto'
-import { LocalAuthGuard } from './guards/local-auth.guard'
-import { JwtAuthGuard } from './guards/jwt-auth.guard'
+import { LocalAuthGuard, JwtAuthGuard, JwtRefreshGuard } from './guards'
 import { Response as ExpressResponse } from 'express'
-import { JwtRefreshGuard } from './guards/jwt-refresh.guard'
-import { Cookies } from '../../infrastructure/decorators/cookie.decorator'
+import { Cookies } from '../../infrastructure/decorators'
 import { CommandBus } from '@nestjs/cqrs'
 import {
   CreateUserCommand,

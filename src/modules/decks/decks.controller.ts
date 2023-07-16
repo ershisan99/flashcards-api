@@ -14,8 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { DecksService } from './decks.service'
-import { CreateDeckDto } from './dto/create-deck.dto'
-import { UpdateDeckDto } from './dto/update-deck.dto'
+import { UpdateDeckDto, CreateDeckDto, GetAllDecksDto } from './dto'
 import { CommandBus } from '@nestjs/cqrs'
 import {
   CreateDeckCommand,
@@ -24,15 +23,13 @@ import {
   GetAllDecksCommand,
   GetDeckByIdCommand,
   UpdateDeckCommand,
+  GetRandomCardInDeckCommand,
+  SaveGradeCommand,
   CreateCardCommand,
 } from './use-cases'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
-import { GetAllDecksDto } from './dto/get-all-decks.dto'
-import { GetAllCardsInDeckDto } from '../cards/dto/get-all-cards.dto'
-import { CreateCardDto } from '../cards/dto/create-card.dto'
+import { JwtAuthGuard } from '../auth/guards'
+import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
 import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
-import { GetRandomCardInDeckCommand } from './use-cases/get-random-card-in-deck-use-case'
-import { SaveGradeCommand } from './use-cases/save-grade-use-case'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
 @Controller('decks')

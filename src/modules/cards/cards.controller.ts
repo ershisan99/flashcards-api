@@ -11,10 +11,10 @@ import {
   UseInterceptors,
 } from '@nestjs/common'
 import { CardsService } from './cards.service'
-import { UpdateCardDto } from './dto/update-card.dto'
+import { UpdateCardDto } from './dto'
 import { CommandBus } from '@nestjs/cqrs'
 import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateCardCommand } from './use-cases'
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/guards'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 
 @Controller('cards')

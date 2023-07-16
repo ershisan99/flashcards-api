@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { DecksRepository } from '../infrastructure/decks.repository'
-import { UpdateDeckDto } from '../dto/update-deck.dto'
+import { UpdateDeckDto } from '../dto'
 import { BadRequestException, NotFoundException } from '@nestjs/common'
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 

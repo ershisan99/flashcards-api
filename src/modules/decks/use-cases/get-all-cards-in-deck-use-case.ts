@@ -1,6 +1,6 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
-import { GetAllCardsInDeckDto } from '../../cards/dto/get-all-cards.dto'
+import { GetAllCardsInDeckDto } from '../../cards/dto'
 import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { DecksRepository } from '../infrastructure/decks.repository'
 

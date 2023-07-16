@@ -1,5 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { CreateCardDto } from '../../cards/dto/create-card.dto'
+import { CreateCardDto } from '../../cards/dto'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 

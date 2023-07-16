@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
 import { PrismaService } from '../../../prisma.service'
-import { GetAllDecksDto } from '../dto/get-all-decks.dto'
+import { GetAllDecksDto } from '../dto'
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
 

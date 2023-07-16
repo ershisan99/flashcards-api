@@ -1,6 +1,6 @@
 import { IsUUID, Max, Min } from 'class-validator'
 
-export class CreateDeckDto {
+export class CreateGradeDto {
   @Min(1)
   @Max(5)
   grade: number
