@@ -40,10 +40,20 @@ export class DecksController {
   constructor(private readonly decksService: DecksService, private commandBus: CommandBus) {}
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'cover', maxCount: 1 }]))
   @Post()
-  create(@Request() req, @Body() createDeckDto: CreateDeckDto) {
+  create(
+    @Request() req,
+    @UploadedFiles()
+    files: {
+      cover: Express.Multer.File[]
+    },
+    @Body() createDeckDto: CreateDeckDto
+  ) {
     const userId = req.user.id
-    return this.commandBus.execute(new CreateDeckCommand({ ...createDeckDto, userId: userId }))
+    return this.commandBus.execute(
+      new CreateDeckCommand({ ...createDeckDto, userId: userId }, files?.cover?.[0])
+    )
   }
 
   @UseGuards(JwtAuthGuard)
@@ -101,9 +111,20 @@ export class DecksController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'cover', maxCount: 1 }]))
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateDeckDto: UpdateDeckDto, @Req() req) {
-    return this.commandBus.execute(new UpdateDeckCommand(id, updateDeckDto, req.user.id))
+  update(
+    @Param('id') id: string,
+    @UploadedFiles()
+    files: {
+      cover: Express.Multer.File[]
+    },
+    @Body() updateDeckDto: UpdateDeckDto,
+    @Req() req
+  ) {
+    return this.commandBus.execute(
+      new UpdateDeckCommand(id, updateDeckDto, req.user.id, files?.cover?.[0])
+    )
   }
 
   @UseGuards(JwtAuthGuard)

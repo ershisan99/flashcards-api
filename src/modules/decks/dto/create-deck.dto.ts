@@ -1,15 +1,17 @@
-import { IsBoolean, IsOptional, IsString, Length } from 'class-validator'
+import { IsBoolean, IsOptional, Length } from 'class-validator'
+import { Transform } from 'class-transformer'
 
 export class CreateDeckDto {
   @Length(3, 30)
   name: string
 
   @IsOptional()
-  @IsString()
+  @Length(0, 0)
   cover?: string
 
   @IsOptional()
   @IsBoolean()
+  @Transform((val: string) => [true, 'true', 1, '1'].indexOf(val) > -1)
   isPrivate?: boolean
 
   userId: string

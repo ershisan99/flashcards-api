@@ -125,6 +125,7 @@ export class DecksRepository {
       throw new InternalServerErrorException(e?.message)
     }
   }
+
   public async findDeckByCardId(cardId: string) {
     try {
       const card = await this.prisma.card.findUnique({
