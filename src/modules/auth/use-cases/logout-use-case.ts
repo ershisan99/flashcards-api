@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken'
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 
 export class LogoutCommand {
-  constructor(public readonly refreshToken: string) {}
+  constructor(public readonly accessToken: string) {}
 }
 
 @CommandHandler(LogoutCommand)
@@ -15,7 +15,7 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
   private readonly logger = new Logger(LogoutHandler.name)
 
   async execute(command: LogoutCommand) {
-    const token = command.refreshToken
+    const token = command.accessToken
 
     const secretKey = process.env.JWT_SECRET_KEY
 
