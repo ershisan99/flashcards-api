@@ -95,6 +95,17 @@ export class UsersRepository {
     }
   }
 
+  async updateUser(id: string, data: Prisma.userUpdateInput): Promise<User> {
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data,
+      })
+    } catch (e) {
+      this.logger.error(e?.message || e)
+      throw new InternalServerErrorException(e)
+    }
+  }
   async deleteUserById(id: string): Promise<boolean> {
     try {
       const result = await this.prisma.user.delete({

@@ -1,4 +1,4 @@
-import { OmitType } from '@nestjs/swagger'
+import { ApiProperty, OmitType } from '@nestjs/swagger'
 
 export class User {
   id: string
@@ -6,9 +6,10 @@ export class User {
   password: string
   isEmailVerified: boolean
   name: string
+  @ApiProperty({ type: 'string', format: 'binary' })
   avatar: string
-  created: string
-  updated: string
+  created: Date
+  updated: Date
 }
 
 export class LoginResponse {

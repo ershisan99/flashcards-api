@@ -5,17 +5,22 @@ import {
   HttpCode,
   HttpStatus,
   Param,
+  Patch,
   Post,
   Request,
   Res,
   Response,
   UnauthorizedException,
+  UploadedFiles,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
+import { FileFieldsInterceptor } from '@nestjs/platform-express'
 import {
   ApiBadRequestResponse,
   ApiBody,
+  ApiConsumes,
   ApiNoContentResponse,
   ApiNotFoundResponse,
   ApiOperation,
@@ -34,6 +39,7 @@ import {
   ResendVerificationEmailDto,
 } from './dto'
 import { ResetPasswordDto } from './dto/reset-password.dto'
+import { UpdateUserDataDto } from './dto/update-user-data.dto'
 import { LoginResponse, UserEntity } from './entities/auth.entity'
 import { JwtAuthGuard, JwtRefreshGuard, LocalAuthGuard } from './guards'
 import {
@@ -45,6 +51,7 @@ import {
   ResetPasswordCommand,
   SendPasswordRecoveryEmailCommand,
   VerifyEmailCommand,
+  UpdateUserCommand,
 } from './use-cases'
 
 @ApiTags('Auth')
@@ -63,6 +70,23 @@ export class AuthController {
     return await this.commandBus.execute(new GetCurrentUserDataCommand(userId))
   }
 
+  @ApiConsumes('multipart/form-data')
+  @ApiOperation({ description: 'Update current user data.', summary: 'Update user data' })
+  @ApiUnauthorizedResponse({ description: 'Not logged in' })
+  @ApiBadRequestResponse({ description: 'User not found' })
+  @UseInterceptors(FileFieldsInterceptor([{ name: 'avatar', maxCount: 1 }]))
+  @UseGuards(JwtAuthGuard)
+  @Patch('me')
+  async updateUserData(
+    @Request() req,
+    @UploadedFiles()
+    files: { avatar: Express.Multer.File[] },
+    @Body() body: UpdateUserDataDto
+  ): Promise<UserEntity> {
+    const userId = req.user.id
+
+    return await this.commandBus.execute(new UpdateUserCommand(userId, body, files.avatar?.[0]))
+  }
   @ApiOperation({
     description: 'Sign in using email and password. Must have an account to do so.',
     summary: 'Sign in using email and password. Must have an account to do so.',

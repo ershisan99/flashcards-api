@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 
+import { FileUploadService } from '../../infrastructure/file-upload-service/file-upload.service'
 import { UsersModule } from '../users/users.module'
 
 import { AuthController } from './auth.controller'
@@ -16,6 +17,7 @@ import {
   ResetPasswordHandler,
   SendPasswordRecoveryEmailHandler,
   VerifyEmailHandler,
+  UpdateUserHandler,
 } from './use-cases'
 
 const commandHandlers = [
@@ -27,12 +29,13 @@ const commandHandlers = [
   ResetPasswordHandler,
   SendPasswordRecoveryEmailHandler,
   VerifyEmailHandler,
+  UpdateUserHandler,
 ]
 
 @Module({
   imports: [UsersModule, CqrsModule],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, AuthRepository, ...commandHandlers],
+  providers: [AuthService, LocalStrategy, AuthRepository, FileUploadService, ...commandHandlers],
   exports: [AuthService, CqrsModule],
 })
 export class AuthModule {}
