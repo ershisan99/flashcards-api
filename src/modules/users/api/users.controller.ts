@@ -25,9 +25,14 @@ export class UsersController {
 
   @Get()
   async findAll(@Query() query) {
-    const { page, pageSize } = Pagination.getPaginationData(query)
+    const { currentPage, itemsPerPage } = Pagination.getPaginationData(query)
 
-    const users = await this.usersService.getUsers(page, pageSize, query.name, query.email)
+    const users = await this.usersService.getUsers(
+      currentPage,
+      itemsPerPage,
+      query.name,
+      query.email
+    )
 
     if (!users) throw new NotFoundException('Users not found')
 
