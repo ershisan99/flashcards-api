@@ -1,6 +1,6 @@
 import { Logger } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import jwt from 'jsonwebtoken'
+import * as jwt from 'jsonwebtoken'
 
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 
