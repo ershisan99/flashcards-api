@@ -47,6 +47,8 @@ export class UsersService {
       })
     } catch (e) {
       this.logger.error(e?.message || e)
+      this.logger.error(e?.stack || e)
+      this.logger.error(JSON.stringify(e))
     }
   }
 
@@ -67,7 +69,9 @@ export class UsersService {
         subject: 'Password recovery',
       })
     } catch (e) {
-      this.logger.error(e)
+      this.logger.error(e?.message || e)
+      this.logger.error(e?.stack || e)
+      this.logger.error(JSON.stringify(e))
     }
   }
 
