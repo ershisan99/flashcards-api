@@ -17,7 +17,7 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
   async execute(command: LogoutCommand) {
     const token = command.accessToken
 
-    const secretKey = process.env.JWT_SECRET_KEY
+    const secretKey = process.env.ACCESS_JWT_SECRET_KEY
 
     if (!secretKey) throw new Error('JWT_SECRET_KEY is not defined')
 
