@@ -2,8 +2,8 @@ import { isObject } from 'remeda'
 
 import { DEFAULT_PAGE_NUMBER, DEFAULT_PAGE_SIZE } from './pagination.constants'
 interface PaginationQuery {
-  currentPage?: string
-  itemsPerPage?: string
+  currentPage?: string | number
+  itemsPerPage?: string | number
 }
 export class Pagination {
   static getPaginationData<T extends Partial<PaginationQuery>>(
@@ -13,14 +13,14 @@ export class Pagination {
 
     const currentPage =
       'currentPage' in query &&
-      typeof query.currentPage === 'string' &&
+      (typeof query.currentPage === 'string' || typeof query.currentPage === 'number') &&
       !isNaN(Number(query.currentPage))
         ? +query.currentPage
         : DEFAULT_PAGE_NUMBER
 
     const itemsPerPage =
       'itemsPerPage' in query &&
-      typeof query.itemsPerPage === 'string' &&
+      (typeof query.itemsPerPage === 'string' || typeof query.itemsPerPage === 'number') &&
       !isNaN(Number(query.itemsPerPage))
         ? +query.itemsPerPage
         : DEFAULT_PAGE_SIZE
