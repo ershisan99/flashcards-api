@@ -28,7 +28,7 @@ export class LogoutHandler implements ICommandHandler<LogoutCommand> {
 
       return null
     } catch (e) {
-      this.logger.log(`Decoding error: ${e}`)
+      this.logger.error(`Decoding error: ${e}`)
 
       return null
     }
