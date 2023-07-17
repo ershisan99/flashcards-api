@@ -116,7 +116,7 @@ model deck {
   created    DateTime @default(now())
   updated    DateTime @updatedAt
   cardsCount Int      @default(0)
-  author     user     @relation(fields: [userId], references: [id])
+  author     user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   card       card[]
   grades     grade[]
 
@@ -132,9 +132,9 @@ model grade {
   shots   Int
   created DateTime @default(now())
   updated DateTime @updatedAt
-  user    user     @relation(fields: [userId], references: [id])
-  card    card     @relation(fields: [cardId], references: [id])
-  deck    deck     @relation(fields: [deckId], references: [id])
+  user    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card    card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  deck    deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([deckId])
@@ -150,7 +150,7 @@ model GeneralChatMessage {
   message  String
   created  DateTime @default(now())
   updated  DateTime @updatedAt
-  user     user     @relation(fields: [userId], references: [id])
+  user     user     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
