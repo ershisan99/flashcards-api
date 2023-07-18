@@ -56,17 +56,25 @@ export class UsersService {
     email,
     name,
     passwordRecoveryToken,
+    html,
+    subject,
   }: {
     email: string
     name: string
+    html?: string
+    subject?: string
     passwordRecoveryToken: string
   }) {
+    const htmlFinal =
+      html.replace('##token##', passwordRecoveryToken).replace('##name##', name) ||
+      `<b>Hello ${name}!</b><br/>To recover your password follow this link:<br/><a href="http://localhost:3000/confirm-email/${passwordRecoveryToken}">Confirm email</a>. If it doesn't work, copy and paste the following link in your browser:<br/>http://localhost:3000/confirm-email/${passwordRecoveryToken} `
+
     try {
       await this.emailService.sendMail({
         from: 'Andrii <andrii@andrii.es>',
         to: email,
-        html: `<b>Hello ${name}!</b><br/>To recover your password follow this link:<br/><a href="http://localhost:3000/confirm-email/${passwordRecoveryToken}">Confirm email</a>. If it doesn't work, copy and paste the following link in your browser:<br/>http://localhost:3000/confirm-email/${passwordRecoveryToken} `,
-        subject: 'Password recovery',
+        html: htmlFinal,
+        subject: subject || 'Password recovery',
       })
     } catch (e) {
       this.logger.error(e?.message || e)

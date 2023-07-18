@@ -208,7 +208,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('recover-password')
   async recoverPassword(@Body() body: RecoverPasswordDto): Promise<void> {
-    return await this.commandBus.execute(new SendPasswordRecoveryEmailCommand(body.email))
+    return await this.commandBus.execute(new SendPasswordRecoveryEmailCommand(body))
   }
 
   @ApiOperation({ description: 'Reset password', summary: 'Reset password' })
