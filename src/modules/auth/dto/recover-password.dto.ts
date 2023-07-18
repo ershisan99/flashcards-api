@@ -9,7 +9,7 @@ export class RecoverPasswordDto {
   @ApiProperty({
     description: `HTML template to be sent in the email;\n ##name## will be replaced with the user's name; \n ##token## will be replaced with the password recovery token`,
     example:
-      '<h1>Hi, ##name#</h1><p>Click <a href="##token##">here</a> to recover your password</p>',
+      '<h1>Hi, ##name##</h1><p>Click <a href="##token##">here</a> to recover your password</p>',
   })
   @IsString()
   @IsOptional()
