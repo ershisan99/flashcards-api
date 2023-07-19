@@ -161,7 +161,13 @@ export class AuthController {
     if (!accessToken) throw new UnauthorizedException()
     await this.commandBus.execute(new LogoutCommand(accessToken))
     res.clearCookie('accessToken', { httpOnly: true, sameSite: 'none', secure: true })
-    res.clearCookie('refreshToken', { httpOnly: true, sameSite: 'none', secure: true })
+
+    res.clearCookie('refreshToken', {
+      path: '/v1/auth/refresh-token',
+      httpOnly: true,
+      sameSite: 'none',
+      secure: true,
+    })
 
     return null
   }
