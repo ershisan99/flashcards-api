@@ -41,7 +41,7 @@ export class UsersService {
     html?: string
     subject?: string
   }) {
-    const htmlFinal = html.replace('##token##', verificationToken)?.replace('##name##', name)
+    const htmlFinal = html.replaceAll('##token##', verificationToken)?.replaceAll('##name##', name)
 
     try {
       await this.emailService.sendMail({
