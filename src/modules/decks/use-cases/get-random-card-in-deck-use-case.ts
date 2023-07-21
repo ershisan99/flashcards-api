@@ -56,6 +56,17 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
     )
     const smartRandomCard = await this.getSmartRandomCard(cards)
 
-    return pick(smartRandomCard, ['id', 'question', 'answer', 'deckId'])
+    return pick(smartRandomCard, [
+      'id',
+      'question',
+      'answer',
+      'deckId',
+      'questionImg',
+      'answerImg',
+      'questionVideo',
+      'answerVideo',
+      'created',
+      'updated',
+    ])
   }
 }

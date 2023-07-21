@@ -125,9 +125,9 @@ model deck {
 
 model grade {
   id      String   @id @default(cuid())
-  deckId  String   @unique
+  deckId  String
   cardId  String   @unique
-  userId  String   @unique
+  userId  String
   grade   Int
   shots   Int
   created DateTime @default(now())

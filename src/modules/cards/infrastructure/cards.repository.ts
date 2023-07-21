@@ -4,7 +4,7 @@ import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import { CreateCardDto, GetAllCardsInDeckDto, UpdateCardDto } from '../dto'
-import { PaginatedCards } from '../entities/cards.entity'
+import { PaginatedCardsWithGrade } from '../entities/cards.entity'
 
 @Injectable()
 export class CardsRepository {
@@ -53,6 +53,7 @@ export class CardsRepository {
 
   async findCardsByDeckId(
     deckId: string,
+    userId: string,
     {
       answer = undefined,
       question = undefined,
@@ -60,7 +61,7 @@ export class CardsRepository {
       itemsPerPage,
       orderBy,
     }: GetAllCardsInDeckDto
-  ): Promise<PaginatedCards> {
+  ): Promise<PaginatedCardsWithGrade> {
     try {
       const where = {
         decks: {
@@ -78,6 +79,16 @@ export class CardsRepository {
         this.prisma.card.findMany({
           orderBy: createPrismaOrderBy(orderBy) || { updated: 'desc' },
           where,
+          include: {
+            grades: {
+              where: {
+                userId,
+              },
+              select: {
+                grade: true,
+              },
+            },
+          },
           skip: (currentPage - 1) * itemsPerPage,
           take: itemsPerPage,
         }),

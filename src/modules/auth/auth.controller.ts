@@ -159,7 +159,9 @@ export class AuthController {
     @Res({ passthrough: true }) res: ExpressResponse
   ): Promise<void> {
     if (!accessToken) throw new UnauthorizedException()
+
     await this.commandBus.execute(new LogoutCommand(accessToken))
+
     res.clearCookie('accessToken', { httpOnly: true, sameSite: 'none', secure: true })
 
     res.clearCookie('refreshToken', {
