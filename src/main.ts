@@ -28,7 +28,10 @@ async function bootstrap() {
     .build()
   const document = SwaggerModule.createDocument(app, config)
 
-  SwaggerModule.setup('docs', app, document)
+  SwaggerModule.setup('docs', app, document, {
+    customJs: '/swagger-ui.js',
+    customCssUrl: '/swagger-themes/dark.css',
+  })
   pipesSetup(app)
   app.useGlobalFilters(new HttpExceptionFilter())
   await app.listen(process.env.PORT || 3000)
@@ -38,7 +41,7 @@ async function bootstrap() {
 }
 
 try {
-  bootstrap()
+  void bootstrap()
 } catch (e) {
   console.log('BOOTSTRAP CALL FAILED')
   console.log('ERROR: ')

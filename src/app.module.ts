@@ -1,7 +1,9 @@
+import { join } from 'path'
 import * as process from 'process'
 
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
+import { ServeStaticModule } from '@nestjs/serve-static'
 import { MailerModule } from '@nestjs-modules/mailer'
 
 import { FileUploadService } from './infrastructure/file-upload-service/file-upload.service'
@@ -23,6 +25,9 @@ import { ConfigModule } from './settings/config.module'
     DecksModule,
     CardsModule,
     PrismaModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'client'),
+    }),
     MailerModule.forRoot({
       transport: {
         host: process.env.AWS_SES_SMTP_HOST,
