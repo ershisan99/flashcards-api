@@ -32,18 +32,23 @@ export class UsersService {
     email,
     name,
     verificationToken,
+    html = `<b>Hello, ##name##!</b><br/>Please confirm your email by clicking on the link below:<br/><a href="http://localhost:3000/confirm-email/##token##">Confirm email</a>. If it doesn't work, copy and paste the following link in your browser:<br/>http://localhost:3000/confirm-email/##token##`,
+    subject = 'E-mail confirmation',
   }: {
     email: string
     name: string
     verificationToken: string
+    html?: string
+    subject?: string
   }) {
+    const htmlFinal = html.replace('##token##', verificationToken)?.replace('##name##', name)
+
     try {
       await this.emailService.sendMail({
         from: 'andrii <andrii@andrii.es>',
         to: email,
-        text: 'hello and welcome, token is: ' + verificationToken,
-        html: `<b>Hello ${name}!</b><br/>Please confirm your email by clicking on the link below:<br/><a href="http://localhost:3000/confirm-email/${verificationToken}">Confirm email</a>`,
-        subject: 'E-mail confirmation',
+        html: htmlFinal,
+        subject,
       })
     } catch (e) {
       this.logger.error(e?.message || e)

@@ -35,10 +35,19 @@ export class CreateUserHandler implements ICommandHandler<CreateUserCommand> {
     if (!createdUser) {
       return null
     }
+    if (!command.user.sendConfirmationEmail) {
+      return {
+        id: createdUser.id,
+        name: createdUser.name,
+        email: createdUser.email,
+      }
+    }
     await this.usersService.sendConfirmationEmail({
       email: createdUser.email,
       name: createdUser.name,
       verificationToken: verificationToken,
+      html: command.user.html,
+      subject: command.user.subject,
     })
 
     return {
