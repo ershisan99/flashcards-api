@@ -64,7 +64,7 @@ export class CardsController {
     @Body() body: UpdateCardDto
   ): Promise<Card> {
     return this.commandBus.execute(
-      new UpdateCardCommand(id, body, req.user.id, files.answerImg?.[0], files.questionImg?.[0])
+      new UpdateCardCommand(id, body, req.user.id, files?.answerImg?.[0], files?.questionImg?.[0])
     )
   }
 

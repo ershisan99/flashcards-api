@@ -85,8 +85,9 @@ export class AuthController {
   ): Promise<UserEntity> {
     const userId = req.user.id
 
-    return await this.commandBus.execute(new UpdateUserCommand(userId, body, files.avatar?.[0]))
+    return await this.commandBus.execute(new UpdateUserCommand(userId, body, files?.avatar?.[0]))
   }
+
   @ApiOperation({
     description: 'Sign in using email and password. Must have an account to do so.',
     summary: 'Sign in using email and password. Must have an account to do so.',

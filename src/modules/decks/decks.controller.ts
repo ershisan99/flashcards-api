@@ -123,6 +123,7 @@ export class DecksController {
   remove(@Param('id') id: string, @Req() req): Promise<Deck> {
     return this.commandBus.execute(new DeleteDeckByIdCommand(id, req.user.id))
   }
+
   @ApiOperation({
     description: 'Retrieve paginated cards in a deck',
     summary: 'Retrieve cards in a deck',
@@ -155,11 +156,12 @@ export class DecksController {
     @Param('id') id: string,
     @Req() req,
     @UploadedFiles()
-    files: { questionImg: Express.Multer.File[]; answerImg: Express.Multer.File[] },
-    @Body() card: CreateCardDto
+    @Body()
+    card: CreateCardDto,
+    files?: { questionImg: Express.Multer.File[]; answerImg: Express.Multer.File[] }
   ): Promise<Card> {
     return this.commandBus.execute(
-      new CreateCardCommand(req.user.id, id, card, files.answerImg?.[0], files.questionImg?.[0])
+      new CreateCardCommand(req.user.id, id, card, files?.answerImg?.[0], files?.questionImg?.[0])
     )
   }
 
