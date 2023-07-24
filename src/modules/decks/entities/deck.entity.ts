@@ -11,6 +11,9 @@ export class Deck {
   created: Date
   updated: Date
   cardsCount: number
+}
+
+export class DeckWithAuthor extends Deck {
   author: DeckAuthor
 }
 
@@ -20,7 +23,7 @@ export class DeckAuthor {
 }
 
 export class PaginatedDecks {
-  items: Deck[]
+  items: DeckWithAuthor[]
   pagination: Pagination
   maxCardsCount: number
 }

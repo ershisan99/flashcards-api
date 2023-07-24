@@ -122,7 +122,7 @@ export class DecksRepository {
     }
   }
 
-  public async findDeckById(id: string) {
+  public async findDeckById(id: string): Promise<Deck> {
     try {
       return await this.prisma.deck.findUnique({
         where: {
@@ -135,7 +135,7 @@ export class DecksRepository {
     }
   }
 
-  public async findDeckByCardId(cardId: string) {
+  public async findDeckByCardId(cardId: string): Promise<Deck> {
     try {
       const card = await this.prisma.card.findUnique({
         where: {

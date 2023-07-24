@@ -35,7 +35,7 @@ import { Card, PaginatedCards } from '../cards/entities/cards.entity'
 
 import { DecksService } from './decks.service'
 import { UpdateDeckDto, CreateDeckDto, GetAllDecksDto } from './dto'
-import { Deck, PaginatedDecks } from './entities/deck.entity'
+import { Deck, DeckWithAuthor, PaginatedDecks } from './entities/deck.entity'
 import {
   CreateDeckCommand,
   DeleteDeckByIdCommand,
@@ -77,7 +77,7 @@ export class DecksController {
       cover: Express.Multer.File[]
     },
     @Body() createDeckDto: CreateDeckDto
-  ): Promise<Deck> {
+  ): Promise<DeckWithAuthor> {
     const userId = req.user.id
 
     return this.commandBus.execute(
@@ -89,7 +89,7 @@ export class DecksController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Deck> {
+  findOne(@Param('id') id: string): Promise<DeckWithAuthor> {
     return this.commandBus.execute(new GetDeckByIdCommand(id))
   }
 
@@ -108,7 +108,7 @@ export class DecksController {
     },
     @Body() updateDeckDto: UpdateDeckDto,
     @Req() req
-  ): Promise<Deck> {
+  ): Promise<DeckWithAuthor> {
     return this.commandBus.execute(
       new UpdateDeckCommand(id, updateDeckDto, req.user.id, files?.cover?.[0])
     )
