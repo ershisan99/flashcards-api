@@ -21,6 +21,7 @@ async function bootstrap() {
     .setTitle('Flashcards')
     .setDescription('Flashcards API')
     .setVersion('1.0')
+    .addServer('https://api.flashcards.andrii.es')
     .addTag('Auth')
     .addTag('Decks')
     .addTag('Cards')
