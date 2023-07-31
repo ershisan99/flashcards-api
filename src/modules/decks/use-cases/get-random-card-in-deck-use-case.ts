@@ -67,6 +67,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
       'answerVideo',
       'created',
       'updated',
+      'shots',
     ])
   }
 }
