@@ -26,7 +26,7 @@ export class VerifyEmailHandler implements ICommandHandler<VerifyEmailCommand> {
     const isTokenExpired = isBefore(verificationWithUser.verificationTokenExpiry, new Date())
 
     if (dbToken !== token || isTokenExpired) {
-      return false
+      throw new BadRequestException('Incorrect or expired token')
     }
 
     const result = await this.usersRepository.updateEmailVerification(verificationWithUser.userId)
