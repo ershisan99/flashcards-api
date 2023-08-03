@@ -45,7 +45,7 @@ export class CardsController {
   }
 
   @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Get card by id', description: 'Get card by id' })
+  @ApiOperation({ summary: 'Update card', description: 'Update partial card data' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Card not found' })
   @UseGuards(JwtAuthGuard)
