@@ -9,11 +9,13 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private readonly authService: AuthService) {
     super({
       usernameField: 'email',
+      passReqToCallback: true,
     })
   }
 
-  async validate(email: string, password: string): Promise<any> {
-    const newCredentials = await this.authService.checkCredentials(email, password)
+  async validate(req: any, email: string, password: string): Promise<any> {
+    const rememberMe = req?.body?.rememberMe || false
+    const newCredentials = await this.authService.checkCredentials(email, password, rememberMe)
 
     if (newCredentials.resultCode === 1) {
       throw new UnauthorizedException('Invalid credentials')

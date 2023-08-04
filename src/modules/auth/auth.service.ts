@@ -12,14 +12,17 @@ import { UsersRepository } from '../users/infrastructure/users.repository'
 export class AuthService {
   constructor(private usersRepository: UsersRepository, private prisma: PrismaService) {}
 
-  async createJwtTokensPair(userId: string) {
+  async createJwtTokensPair(userId: string, rememberMe?: boolean) {
     const accessSecretKey = process.env.ACCESS_JWT_SECRET_KEY
     const refreshSecretKey = process.env.REFRESH_JWT_SECRET_KEY
+
+    const accessExpiresIn = rememberMe ? '1d' : '10m'
+
     const payload: { userId: string; date: Date } = {
       userId,
       date: new Date(),
     }
-    const accessToken = jwt.sign(payload, accessSecretKey, { expiresIn: '10m' })
+    const accessToken = jwt.sign(payload, accessSecretKey, { expiresIn: accessExpiresIn })
     const refreshToken = jwt.sign(payload, refreshSecretKey, {
       expiresIn: '30d',
     })
@@ -39,7 +42,7 @@ export class AuthService {
     }
   }
 
-  async checkCredentials(email: string, password: string) {
+  async checkCredentials(email: string, password: string, rememberMe?: boolean) {
     const user = await this.usersRepository.findUserByEmail(email)
 
     if (!user /*|| !user.emailConfirmation.isConfirmed*/)
@@ -63,7 +66,7 @@ export class AuthService {
         },
       }
     }
-    const tokensPair = await this.createJwtTokensPair(user.id)
+    const tokensPair = await this.createJwtTokensPair(user.id, rememberMe)
 
     return {
       resultCode: 0,
