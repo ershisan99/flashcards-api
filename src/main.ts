@@ -35,7 +35,7 @@ async function bootstrap() {
   })
   pipesSetup(app)
   app.useGlobalFilters(new HttpExceptionFilter())
-  await app.listen(process.env.PORT || 3000)
+  await app.listen(process.env.PORT || 3333)
   const logger = new Logger('NestApplication')
 
   logger.log(`Application is running on: ${await app.getUrl()}`)
