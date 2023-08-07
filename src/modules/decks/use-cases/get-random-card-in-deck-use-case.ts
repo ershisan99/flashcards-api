@@ -27,6 +27,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
   private async getSmartRandomCard(cards: Array<CardWithGrade>): Promise<Card> {
     const selectionPool: Array<CardWithGrade> = []
 
+    console.log(cards.length)
     cards.forEach(card => {
       // Calculate the average grade for the card
       const averageGrade =
@@ -51,7 +52,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
   ): Promise<Card> {
     const randomCard = await this.getSmartRandomCard(cards)
 
-    if (randomCard.id === previousCardId) {
+    if (randomCard.id === previousCardId && cards.length !== 1) {
       return this.getNotDuplicateRandomCard(cards, previousCardId)
     }
 
