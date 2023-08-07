@@ -62,9 +62,12 @@ export class CardsRepository {
       question = undefined,
       currentPage,
       itemsPerPage,
-      orderBy = 'updated-desc',
+      orderBy,
     }: GetAllCardsInDeckDto
   ): Promise<PaginatedCardsWithGrade> {
+    if (!orderBy) {
+      orderBy = 'updated-desc'
+    }
     try {
       const where = {
         decks: {

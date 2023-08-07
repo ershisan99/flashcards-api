@@ -59,8 +59,11 @@ export class DecksRepository {
     itemsPerPage,
     minCardsCount,
     maxCardsCount,
-    orderBy = 'updated-desc',
+    orderBy,
   }: GetAllDecksDto): Promise<PaginatedDecks> {
+    if (!orderBy) {
+      orderBy = 'updated-desc'
+    }
     try {
       const where = {
         cardsCount: {
