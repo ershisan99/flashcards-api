@@ -26,8 +26,12 @@ export class GradesRepository {
         },
         update: {
           grade,
-          shots: {
-            increment: 1,
+          card: {
+            update: {
+              shots: {
+                increment: 1,
+              },
+            },
           },
         },
         create: {
@@ -41,6 +45,7 @@ export class GradesRepository {
           card: {
             connect: {
               id: cardId,
+              shots: 1,
             },
           },
           deck: {
