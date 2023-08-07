@@ -34,7 +34,6 @@ async function main() {
 
   const el = $('.topbar-wrapper')
 
-  console.log(el)
   if (el) {
     const form = el.getElementsByTagName('form')[0]
 

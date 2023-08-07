@@ -26,7 +26,6 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
   private async getSmartRandomCard(cards: Array<CardWithGrade>): Promise<CardWithGrade> {
     const selectionPool: Array<CardWithGrade> = []
 
-    console.log(cards.length)
     cards.forEach(card => {
       // Calculate the average grade for the card
       const averageGrade =
