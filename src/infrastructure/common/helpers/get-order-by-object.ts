@@ -1,6 +1,22 @@
 type OrderByDirection = 'asc' | 'desc'
 
 export function createPrismaOrderBy(input: string | null) {
+  const { key, direction, relation, field } = getOrderByObject(input)
+
+  if (relation && field) {
+    return {
+      [relation]: {
+        [field]: direction,
+      },
+    }
+  }
+
+  return {
+    [key]: direction as OrderByDirection,
+  }
+}
+
+export function getOrderByObject(input: string) {
   if (!input || input === 'null') {
     return undefined
   }
@@ -18,13 +34,14 @@ export function createPrismaOrderBy(input: string | null) {
     const [relation, field] = key.split('.')
 
     return {
-      [relation]: {
-        [field]: direction,
-      },
+      relation,
+      field,
+      direction,
     }
   }
 
   return {
-    [key]: direction as OrderByDirection,
+    key,
+    direction: direction as OrderByDirection,
   }
 }

@@ -17,7 +17,7 @@ export class Card {
 }
 
 export class PaginatedCards {
-  items: Omit<Card, 'userId' | 'rating'>[]
+  items: Array<Omit<Card, 'userId' | 'rating'> & { grade: number }>
   pagination: Pagination
 }
 

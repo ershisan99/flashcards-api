@@ -42,6 +42,7 @@ export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDe
             'created',
             'updated',
             'shots',
+            'grade',
           ]
         )
       ),
