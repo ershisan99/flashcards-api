@@ -8,7 +8,11 @@ import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class GetRandomCardInDeckCommand {
-  constructor(public readonly userId: string, public readonly deckId: string) {}
+  constructor(
+    public readonly userId: string,
+    public readonly deckId: string,
+    public readonly previousCardId: string
+  ) {}
 }
 
 type CardWithGrade = Prisma.cardGetPayload<{ include: { grades: true } }>
@@ -41,6 +45,19 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
     return selectionPool[Math.floor(Math.random() * selectionPool.length)]
   }
 
+  private async getNotDuplicateRandomCard(
+    cards: Array<CardWithGrade>,
+    previousCardId: string
+  ): Promise<Card> {
+    const randomCard = await this.getSmartRandomCard(cards)
+
+    if (randomCard.id === previousCardId) {
+      return this.getNotDuplicateRandomCard(cards, previousCardId)
+    }
+
+    return randomCard
+  }
+
   async execute(command: GetRandomCardInDeckCommand) {
     const deck = await this.decksRepository.findDeckById(command.deckId)
 
@@ -54,7 +71,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
       command.userId,
       command.deckId
     )
-    const smartRandomCard = await this.getSmartRandomCard(cards)
+    const smartRandomCard = await this.getNotDuplicateRandomCard(cards, command.previousCardId)
 
     return pick(smartRandomCard, [
       'id',

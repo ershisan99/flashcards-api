@@ -34,18 +34,19 @@ import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
 import { Card, PaginatedCards } from '../cards/entities/cards.entity'
 
 import { DecksService } from './decks.service'
-import { UpdateDeckDto, CreateDeckDto, GetAllDecksDto } from './dto'
+import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
+import { GetRandomCardDto } from './dto/get-random-card.dto'
 import { Deck, DeckWithAuthor, PaginatedDecks } from './entities/deck.entity'
 import {
+  CreateCardCommand,
   CreateDeckCommand,
   DeleteDeckByIdCommand,
   GetAllCardsInDeckCommand,
   GetAllDecksCommand,
   GetDeckByIdCommand,
-  UpdateDeckCommand,
   GetRandomCardInDeckCommand,
   SaveGradeCommand,
-  CreateCardCommand,
+  UpdateDeckCommand,
 } from './use-cases'
 
 @ApiTags('Decks')
@@ -172,23 +173,33 @@ export class DecksController {
     summary: 'Retrieve a random card',
   })
   @Get(':id/learn')
-  findRandomCardInDeck(@Param('id') id: string, @Req() req): Promise<Card> {
-    return this.commandBus.execute(new GetRandomCardInDeckCommand(req.user.id, id))
+  findRandomCardInDeck(
+    @Param('id') id: string,
+    @Req() req,
+    @Query() query: GetRandomCardDto
+  ): Promise<Card> {
+    return this.commandBus.execute(
+      new GetRandomCardInDeckCommand(req.user.id, id, query.previousCardId)
+    )
   }
 
   @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Card not found' })
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @HttpCode(HttpStatus.OK)
   @ApiNoContentResponse({ description: 'Grade saved' })
   @Post(':id/learn')
   @ApiOperation({
     description: 'Save the grade of a card',
     summary: 'Save the grade of a card',
   })
-  saveGrade(@Param('id') id: string, @Req() req, @Body() body: SaveGradeDto): Promise<void> {
-    return this.commandBus.execute(
+  async saveGrade(@Param('id') id: string, @Req() req, @Body() body: SaveGradeDto) {
+    const saved = await this.commandBus.execute(
       new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
+    )
+
+    return await this.commandBus.execute(
+      new GetRandomCardInDeckCommand(req.user.id, saved.deckId, saved.id)
     )
   }
 }
