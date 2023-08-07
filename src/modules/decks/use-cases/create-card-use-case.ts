@@ -1,9 +1,11 @@
+import { ForbiddenException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { CreateCardDto } from '../../cards/dto'
 import { Card } from '../../cards/entities/cards.entity'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
+import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class CreateCardCommand {
   constructor(
@@ -19,11 +21,18 @@ export class CreateCardCommand {
 export class CreateCardHandler implements ICommandHandler<CreateCardCommand> {
   constructor(
     private readonly cardsRepository: CardsRepository,
+    private readonly decksRepository: DecksRepository,
     private readonly fileUploadService: FileUploadService
   ) {}
 
   async execute(command: CreateCardCommand): Promise<Card> {
     let questionImg, answerImg
+
+    const deck = await this.decksRepository.findDeckById(command.deckId)
+
+    if (deck.userId !== command.userId) {
+      throw new ForbiddenException(`You can't create cards in a deck that you don't own`)
+    }
 
     if (command.questionImg && command.answerImg) {
       const addQuestionImagePromise = this.fileUploadService.uploadFile(

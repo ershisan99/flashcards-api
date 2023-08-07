@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { CardsRepository } from '../infrastructure/cards.repository'
@@ -16,7 +16,7 @@ export class DeleteCardByIdHandler implements ICommandHandler<DeleteCardByIdComm
 
     if (!card) throw new NotFoundException(`Card with id ${command.id} not found`)
     if (card.userId !== command.userId) {
-      throw new BadRequestException(`You can't delete a card that you don't own`)
+      throw new ForbiddenException(`You can't delete a card that you don't own`)
     }
 
     await this.cardsRepository.deleteCardById(command.id)

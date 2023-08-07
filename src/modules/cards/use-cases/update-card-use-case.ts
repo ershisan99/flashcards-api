@@ -1,4 +1,4 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
@@ -29,7 +29,7 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
     if (!card) throw new NotFoundException(`Card with id ${command.cardId} not found`)
 
     if (card.userId !== command.userId) {
-      throw new BadRequestException(`You can't change a card that you don't own`)
+      throw new ForbiddenException(`You can't change a card that you don't own`)
     }
 
     let questionImg, answerImg
