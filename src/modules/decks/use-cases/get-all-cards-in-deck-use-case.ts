@@ -1,6 +1,6 @@
 import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
-import { omit } from 'remeda'
+import { pick } from 'remeda'
 
 import { GetAllCardsInDeckDto } from '../../cards/dto'
 import { PaginatedCards, PaginatedCardsWithGrade } from '../../cards/entities/cards.entity'
@@ -24,19 +24,27 @@ export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDe
   private transformGrade(cards: PaginatedCardsWithGrade): PaginatedCards {
     return {
       ...cards,
-      items: cards.items.map(card => {
-        if (card.grades.length === 0) return omit({ ...card, grade: 0 }, ['grades'])
-
-        const grade = card.grades.reduce((acc, grade) => acc + grade.grade, 0) / card.grades.length
-
-        return omit(
+      items: cards.items.map(card =>
+        pick(
           {
             ...card,
-            grade,
+            grade: card.grades[0]?.grade || 0,
           },
-          ['grades']
+          [
+            'id',
+            'question',
+            'answer',
+            'deckId',
+            'questionImg',
+            'answerImg',
+            'questionVideo',
+            'answerVideo',
+            'created',
+            'updated',
+            'shots',
+          ]
         )
-      }),
+      ),
     }
   }
 

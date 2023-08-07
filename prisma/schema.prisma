@@ -126,7 +126,7 @@ model deck {
 model grade {
   id      String   @id @default(cuid())
   deckId  String
-  cardId  String   @unique
+  cardId  String
   userId  String
   grade   Int
   shots   Int
@@ -136,6 +136,7 @@ model grade {
   card    card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
   deck    deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
 
+  @@unique([cardId, userId])
   @@index([userId])
   @@index([deckId])
   @@index([cardId])

@@ -3,7 +3,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { Prisma } from '@prisma/client'
 import { pick } from 'remeda'
 
-import { Card } from '../../cards/entities/cards.entity'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
@@ -24,7 +23,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
     private readonly decksRepository: DecksRepository
   ) {}
 
-  private async getSmartRandomCard(cards: Array<CardWithGrade>): Promise<Card> {
+  private async getSmartRandomCard(cards: Array<CardWithGrade>): Promise<CardWithGrade> {
     const selectionPool: Array<CardWithGrade> = []
 
     console.log(cards.length)
@@ -49,7 +48,7 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
   private async getNotDuplicateRandomCard(
     cards: Array<CardWithGrade>,
     previousCardId: string
-  ): Promise<Card> {
+  ): Promise<CardWithGrade> {
     const randomCard = await this.getSmartRandomCard(cards)
 
     if (randomCard.id === previousCardId && cards.length !== 1) {
@@ -67,25 +66,27 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
     if (deck.userId !== command.userId && deck.isPrivate) {
       throw new ForbiddenException(`You can't get a private deck that you don't own`)
     }
-
     const cards = await this.cardsRepository.findCardsByDeckIdWithGrade(
       command.userId,
       command.deckId
     )
     const smartRandomCard = await this.getNotDuplicateRandomCard(cards, command.previousCardId)
 
-    return pick(smartRandomCard, [
-      'id',
-      'question',
-      'answer',
-      'deckId',
-      'questionImg',
-      'answerImg',
-      'questionVideo',
-      'answerVideo',
-      'created',
-      'updated',
-      'shots',
-    ])
+    return {
+      ...pick(smartRandomCard, [
+        'id',
+        'question',
+        'answer',
+        'deckId',
+        'questionImg',
+        'answerImg',
+        'questionVideo',
+        'answerVideo',
+        'created',
+        'updated',
+        'shots',
+      ]),
+      grade: smartRandomCard.grades[0]?.grade || 0,
+    }
   }
 }

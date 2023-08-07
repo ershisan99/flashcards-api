@@ -22,7 +22,10 @@ export class GradesRepository {
     try {
       return await this.prisma.grade.upsert({
         where: {
-          cardId,
+          cardId_userId: {
+            cardId,
+            userId,
+          },
         },
         update: {
           grade,
@@ -45,7 +48,6 @@ export class GradesRepository {
           card: {
             connect: {
               id: cardId,
-              shots: 1,
             },
           },
           deck: {

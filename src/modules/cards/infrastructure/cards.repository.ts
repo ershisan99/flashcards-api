@@ -111,7 +111,6 @@ export class CardsRepository {
           grades: {
             where: {
               userId,
-              deckId,
             },
           },
         },
