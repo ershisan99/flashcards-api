@@ -62,7 +62,7 @@ export class CardsRepository {
       question = undefined,
       currentPage,
       itemsPerPage,
-      orderBy,
+      orderBy = 'updated-desc',
     }: GetAllCardsInDeckDto
   ): Promise<PaginatedCardsWithGrade> {
     try {
@@ -78,7 +78,7 @@ export class CardsRepository {
         },
       }
 
-      const { key, direction } = getOrderByObject(orderBy)
+      const { key, direction } = getOrderByObject(orderBy) || {}
 
       if (key === 'grade') {
         const start = (currentPage - 1) * itemsPerPage
@@ -122,7 +122,7 @@ export class CardsRepository {
         const result = await this.prisma.$transaction([
           this.prisma.card.count({ where }),
           this.prisma.card.findMany({
-            orderBy: createPrismaOrderBy(orderBy) || { updated: 'desc' },
+            orderBy: createPrismaOrderBy(orderBy),
             where,
             include: {
               grades: {

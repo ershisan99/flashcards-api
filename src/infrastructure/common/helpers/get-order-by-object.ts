@@ -1,7 +1,10 @@
 type OrderByDirection = 'asc' | 'desc'
 
 export function createPrismaOrderBy(input: string | null) {
-  const { key, direction, relation, field } = getOrderByObject(input)
+  const orderByObject = getOrderByObject(input)
+
+  if (!orderByObject) return null
+  const { key, direction, relation, field } = orderByObject
 
   if (relation && field) {
     return {
