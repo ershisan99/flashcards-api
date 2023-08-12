@@ -65,7 +65,7 @@ export class CardsRepository {
       orderBy,
     }: GetAllCardsInDeckDto
   ): Promise<PaginatedCardsWithGrade> {
-    if (!orderBy) {
+    if (!orderBy || orderBy === 'null') {
       orderBy = 'updated-desc'
     }
     try {

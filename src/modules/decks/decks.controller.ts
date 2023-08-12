@@ -33,7 +33,6 @@ import { JwtAuthGuard } from '../auth/guards'
 import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
 import { Card, PaginatedCards } from '../cards/entities/cards.entity'
 
-import { DecksService } from './decks.service'
 import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
 import { GetRandomCardDto } from './dto/get-random-card.dto'
 import { Deck, DeckWithAuthor, PaginatedDecks } from './entities/deck.entity'
@@ -52,7 +51,7 @@ import {
 @ApiTags('Decks')
 @Controller('decks')
 export class DecksController {
-  constructor(private readonly decksService: DecksService, private commandBus: CommandBus) {}
+  constructor(private commandBus: CommandBus) {}
 
   @HttpCode(HttpStatus.PARTIAL_CONTENT)
   @ApiOperation({ description: 'Retrieve paginated decks list.', summary: 'Paginated decks list' })

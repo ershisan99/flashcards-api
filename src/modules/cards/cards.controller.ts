@@ -25,7 +25,6 @@ import {
 
 import { JwtAuthGuard } from '../auth/guards'
 
-import { CardsService } from './cards.service'
 import { UpdateCardDto } from './dto'
 import { Card } from './entities/cards.entity'
 import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateCardCommand } from './use-cases'
@@ -33,7 +32,7 @@ import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateCardCommand } from './
 @ApiTags('Cards')
 @Controller('cards')
 export class CardsController {
-  constructor(private readonly decksService: CardsService, private commandBus: CommandBus) {}
+  constructor(private commandBus: CommandBus) {}
 
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get card by id', description: 'Get card by id' })
