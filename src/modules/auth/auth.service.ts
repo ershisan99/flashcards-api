@@ -16,7 +16,7 @@ export class AuthService {
     const accessSecretKey = process.env.ACCESS_JWT_SECRET_KEY
     const refreshSecretKey = process.env.REFRESH_JWT_SECRET_KEY
 
-    const accessExpiresIn = rememberMe ? '1d' : '10m'
+    const accessExpiresIn = rememberMe ? '1d' : '10s'
 
     const payload: { userId: string; date: Date } = {
       userId,

@@ -190,7 +190,10 @@ export class AuthController {
   ): Promise<void> {
     if (!req.cookies?.refreshToken) throw new UnauthorizedException()
     const userId = req.user.id
-    const newTokens = await this.commandBus.execute(new RefreshTokenCommand(userId))
+    const shortAccessToken = req.headers['x-short-access-token'] === 'true'
+    const newTokens = await this.commandBus.execute(
+      new RefreshTokenCommand(userId, shortAccessToken)
+    )
 
     res.cookie('refreshToken', newTokens.refreshToken, {
       httpOnly: true,

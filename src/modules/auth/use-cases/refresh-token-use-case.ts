@@ -5,7 +5,7 @@ import * as jwt from 'jsonwebtoken'
 import { AuthRepository } from '../infrastructure/auth.repository'
 
 export class RefreshTokenCommand {
-  constructor(public readonly userId: string) {}
+  constructor(public readonly userId: string, public readonly shortAccessToken: boolean) {}
 }
 
 @CommandHandler(RefreshTokenCommand)
@@ -13,7 +13,7 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
   constructor(private readonly authRepository: AuthRepository) {}
 
   async execute(command: RefreshTokenCommand) {
-    const { userId } = command
+    const { userId, shortAccessToken } = command
 
     const accessSecretKey = process.env.ACCESS_JWT_SECRET_KEY
     const refreshSecretKey = process.env.REFRESH_JWT_SECRET_KEY
@@ -22,7 +22,9 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       userId,
       date: new Date(),
     }
-    const accessToken = jwt.sign(payload, accessSecretKey, { expiresIn: '10m' })
+    const accessToken = jwt.sign(payload, accessSecretKey, {
+      expiresIn: shortAccessToken ? '10s' : '10m',
+    })
     const refreshToken = jwt.sign(payload, refreshSecretKey, {
       expiresIn: '30d',
     })
