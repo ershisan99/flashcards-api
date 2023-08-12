@@ -1,4 +1,4 @@
-import { ForbiddenException, NotFoundException } from '@nestjs/common'
+import { ForbiddenException, Logger, NotFoundException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { Prisma } from '@prisma/client'
 import { pick } from 'remeda'
@@ -18,6 +18,7 @@ type CardWithGrade = Prisma.cardGetPayload<{ include: { grades: true } }>
 
 @CommandHandler(GetRandomCardInDeckCommand)
 export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCardInDeckCommand> {
+  logger = new Logger(GetRandomCardInDeckHandler.name)
   constructor(
     private readonly cardsRepository: CardsRepository,
     private readonly decksRepository: DecksRepository
@@ -50,6 +51,14 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
   ): Promise<CardWithGrade> {
     const randomCard = await this.getSmartRandomCard(cards)
 
+    if (!randomCard) {
+      this.logger.error(`No cards found in deck with id ${randomCard.deckId}`, {
+        previousCardId,
+        randomCard,
+        cards,
+      })
+      throw new NotFoundException(`No cards found in deck with id ${randomCard.deckId}`)
+    }
     if (randomCard.id === previousCardId && cards.length !== 1) {
       return this.getNotDuplicateRandomCard(cards, previousCardId)
     }

@@ -155,9 +155,9 @@ export class DecksController {
   createCardInDeck(
     @Param('id') id: string,
     @Req() req,
-    @UploadedFiles()
     @Body()
     card: CreateCardDto,
+    @UploadedFiles()
     files?: { questionImg: Express.Multer.File[]; answerImg: Express.Multer.File[] }
   ): Promise<Card> {
     return this.commandBus.execute(

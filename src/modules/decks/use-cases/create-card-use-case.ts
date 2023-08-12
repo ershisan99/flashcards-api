@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common'
+import { ForbiddenException, NotFoundException } from '@nestjs/common'
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
@@ -30,6 +30,9 @@ export class CreateCardHandler implements ICommandHandler<CreateCardCommand> {
 
     const deck = await this.decksRepository.findDeckById(command.deckId)
 
+    if (!deck) {
+      throw new NotFoundException(`Deck with id ${command.deckId} not found`)
+    }
     if (deck.userId !== command.userId) {
       throw new ForbiddenException(`You can't create cards in a deck that you don't own`)
     }
