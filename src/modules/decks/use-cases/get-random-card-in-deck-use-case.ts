@@ -52,12 +52,12 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
     const randomCard = await this.getSmartRandomCard(cards)
 
     if (!randomCard) {
-      this.logger.error(`No cards found in deck with id ${randomCard.deckId}`, {
+      this.logger.error(`No cards found in deck}`, {
         previousCardId,
         randomCard,
         cards,
       })
-      throw new NotFoundException(`No cards found in deck with id ${randomCard.deckId}`)
+      throw new NotFoundException(`No cards found in deck`)
     }
     if (randomCard.id === previousCardId && cards.length !== 1) {
       return this.getNotDuplicateRandomCard(cards, previousCardId)
@@ -78,6 +78,11 @@ export class GetRandomCardInDeckHandler implements ICommandHandler<GetRandomCard
       command.userId,
       command.deckId
     )
+
+    if (!cards.length) {
+      throw new NotFoundException(`No cards found in deck with id ${command.deckId}`)
+    }
+
     const smartRandomCard = await this.getNotDuplicateRandomCard(cards, command.previousCardId)
 
     return {
