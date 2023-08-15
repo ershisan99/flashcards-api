@@ -3,9 +3,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 
 import { UsersRepository } from '../../users/infrastructure/users.repository'
 import { UsersService } from '../../users/services/users.service'
+import { ResendVerificationEmailDto } from '../dto'
 
 export class ResendVerificationEmailCommand {
-  constructor(public readonly userId: string) {}
+  constructor(public readonly body: ResendVerificationEmailDto) {}
 }
 
 @CommandHandler(ResendVerificationEmailCommand)
@@ -18,7 +19,7 @@ export class ResendVerificationEmailHandler
   ) {}
 
   async execute(command: ResendVerificationEmailCommand) {
-    const user = await this.usersRepository.findUserById(command.userId)
+    const user = await this.usersRepository.findUserById(command.body.userId)
 
     if (!user) {
       throw new NotFoundException('User not found')
@@ -34,6 +35,8 @@ export class ResendVerificationEmailHandler
       email: updatedUser.user.email,
       name: updatedUser.user.name,
       verificationToken: updatedUser.verificationToken,
+      html: command.body.html,
+      subject: command.body.subject,
     })
     if (!updatedUser) {
       throw new NotFoundException('User not found')
