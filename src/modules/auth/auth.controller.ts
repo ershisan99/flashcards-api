@@ -146,7 +146,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Post('resend-verification-email')
   async resendVerificationEmail(@Body() body: ResendVerificationEmailDto): Promise<void> {
-    return await this.commandBus.execute(new ResendVerificationEmailCommand(body.userId))
+    return await this.commandBus.execute(new ResendVerificationEmailCommand(body))
   }
 
   @ApiOperation({ description: 'Sign current user out', summary: 'Sign current user out' })
