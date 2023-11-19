@@ -17,7 +17,7 @@ export class CreateDeckDto {
    */
   @IsOptional()
   @IsBoolean()
-  @Transform((val: string) => [true, 'true', 1, '1'].indexOf(val) > -1)
+  @Transform(({ value }) => [true, 'true', 1, '1'].indexOf(value) > -1)
   isPrivate?: boolean
 
   @ApiHideProperty()

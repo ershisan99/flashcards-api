@@ -1,3 +1,5 @@
+import { OmitType } from '@nestjs/swagger'
+
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.dto'
 
 export class Card {
@@ -16,8 +18,10 @@ export class Card {
   updated: Date
 }
 
+export class CardWithoutRating extends OmitType(Card, ['rating'] as const) {}
+
 export class PaginatedCards {
-  items: Array<Omit<Card, 'userId' | 'rating'> & { grade: number }>
+  items: CardWithoutRating[]
   pagination: Pagination
 }
 
@@ -25,6 +29,7 @@ export class PaginatedCardsWithGrade {
   pagination: Pagination
   items: CardWithGrade[]
 }
+
 export class CardWithGrade extends Card {
   grades?: Array<{ grade: number }>
 }
