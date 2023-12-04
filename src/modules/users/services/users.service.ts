@@ -6,7 +6,10 @@ import { UsersRepository } from '../infrastructure/users.repository'
 
 @Injectable()
 export class UsersService {
-  constructor(private usersRepository: UsersRepository, private emailService: MailerService) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    private emailService: MailerService
+  ) {}
 
   private logger = new Logger(UsersService.name)
 
@@ -32,7 +35,7 @@ export class UsersService {
     email,
     name,
     verificationToken,
-    html = `<b>Hello, ##name##!</b><br/>Please confirm your email by clicking on the link below:<br/><a href="http://localhost:3000/confirm-email/##token##">Confirm email</a>. If it doesn't work, copy and paste the following link in your browser:<br/>http://localhost:3000/confirm-email/##token##`,
+    html,
     subject = 'E-mail confirmation',
   }: {
     email: string
@@ -41,7 +44,11 @@ export class UsersService {
     html?: string
     subject?: string
   }) {
-    const htmlFinal = html.replaceAll('##token##', verificationToken)?.replaceAll('##name##', name)
+    const htmlFinal = this.prepareHtml(
+      html ?? this.defaultConfirmationHtml,
+      name,
+      verificationToken
+    )
 
     try {
       await this.emailService.sendMail({
@@ -70,9 +77,11 @@ export class UsersService {
     subject?: string
     passwordRecoveryToken: string
   }) {
-    const htmlFinal =
-      html?.replace('##token##', passwordRecoveryToken)?.replace('##name##', name) ||
-      `<b>Hello ${name}!</b><br/>To recover your password follow this link:<br/><a href="http://localhost:3000/confirm-email/${passwordRecoveryToken}">Confirm email</a>. If it doesn't work, copy and paste the following link in your browser:<br/>http://localhost:3000/confirm-email/${passwordRecoveryToken} `
+    const htmlFinal = this.prepareHtml(
+      html ?? this.defaultRecoveryHtml,
+      name,
+      passwordRecoveryToken
+    )
 
     try {
       await this.emailService.sendMail({
@@ -91,4 +100,28 @@ export class UsersService {
   public async generateHash(password: string) {
     return await bcrypt.hash(password, 10)
   }
+
+  private prepareHtml(html: string, name: string, token: string) {
+    return html.replaceAll('##token##', token)?.replaceAll('##name##', name)
+  }
+
+  private defaultConfirmationHtml = `
+    <b>Hello, ##name##!</b>
+    <br/>
+    Please confirm your email by clicking on the link below:
+    <br/>
+    <a href="http://localhost:3000/confirm-email/##token##">Confirm email</a>. 
+    If it doesn't work, copy and paste the following link in your browser:
+    <br/>
+    http://localhost:3000/confirm-email/##token##`
+
+  private defaultRecoveryHtml = `
+    <b>Hello, ##name##!</b>
+    <br/>
+    To recover your password follow the link below:
+    <br/>
+    <a href="http://localhost:3000/recover-password/##token##">Recover password</a>. 
+    If it doesn't work, copy and paste the following link in your browser:
+    <br/>
+    http://localhost:3000/recover-password/##token##`
 }

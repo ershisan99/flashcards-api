@@ -1,15 +1,20 @@
 import { ApiHideProperty } from '@nestjs/swagger'
-import { IsUUID } from 'class-validator'
+import { Type } from 'class-transformer'
+import { IsNumber, IsOptional, IsUUID } from 'class-validator'
 
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
 import { IsOptionalOrEmptyString, IsOrderBy } from '../../../infrastructure/decorators'
 
 export class GetAllDecksDto extends PaginationDto {
-  @IsOptionalOrEmptyString()
-  minCardsCount?: string
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  minCardsCount?: number
 
-  @IsOptionalOrEmptyString()
-  maxCardsCount?: string
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  maxCardsCount?: number
 
   /** Search by deck name */
   @IsOptionalOrEmptyString()
