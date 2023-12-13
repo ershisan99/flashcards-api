@@ -85,10 +85,10 @@ model card {
   question      String   @db.Text
   answer        String   @db.Text
   shots         Int      @default(0)
-  questionImg   String?
-  answerImg     String?
-  answerVideo   String?
-  questionVideo String?
+  questionImg   String?  @db.VarChar(500)
+  answerImg     String?  @db.VarChar(500)
+  answerVideo   String?  @db.VarChar(500)
+  questionVideo String?  @db.VarChar(500)
   comments      String?
   type          String?
   rating        Int      @default(0)
@@ -109,7 +109,7 @@ model deck {
   name       String
   isPrivate  Boolean  @default(false)
   shots      Int      @default(0)
-  cover      String?
+  cover      String?  @db.VarChar(500)
   rating     Int      @default(0)
   isDeleted  Boolean?
   isBlocked  Boolean?
