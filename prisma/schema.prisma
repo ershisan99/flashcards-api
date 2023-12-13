@@ -158,8 +158,8 @@ model GeneralChatMessage {
 
 model fileEntity {
   id        Int      @id @default(autoincrement())
-  fileName  String
-  fileUrl   String
+  fileName  String   @db.VarChar(500)
+  fileUrl   String   @db.VarChar(500)
   key       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
