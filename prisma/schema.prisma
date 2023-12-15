@@ -91,7 +91,6 @@ model card {
   questionVideo String?  @db.VarChar(500)
   comments      String?
   type          String?
-  rating        Int      @default(0)
   moreId        String?
   created       DateTime @default(now())
   updated       DateTime @updatedAt
@@ -110,7 +109,6 @@ model deck {
   isPrivate  Boolean  @default(false)
   shots      Int      @default(0)
   cover      String?  @db.VarChar(500)
-  rating     Int      @default(0)
   isDeleted  Boolean?
   isBlocked  Boolean?
   created    DateTime @default(now())

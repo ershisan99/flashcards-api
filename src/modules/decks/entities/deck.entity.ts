@@ -7,7 +7,6 @@ export class Deck {
   isPrivate: boolean
   shots: number
   cover: string | null
-  rating: number
   created: Date
   updated: Date
   cardsCount: number
