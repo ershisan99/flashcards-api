@@ -38,7 +38,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
     }
 
     const updatedUser = await this.usersRepository.updateUser(command.userId, {
-      name: command.user.name.trim(),
+      name: command.user.name?.trim(),
       avatar,
     })
 
