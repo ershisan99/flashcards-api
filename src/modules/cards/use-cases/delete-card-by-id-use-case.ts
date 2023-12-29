@@ -4,7 +4,10 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { CardsRepository } from '../infrastructure/cards.repository'
 
 export class DeleteCardByIdCommand {
-  constructor(public readonly id: string, public readonly userId: string) {}
+  constructor(
+    public readonly id: string,
+    public readonly userId: string
+  ) {}
 }
 
 @CommandHandler(DeleteCardByIdCommand)
