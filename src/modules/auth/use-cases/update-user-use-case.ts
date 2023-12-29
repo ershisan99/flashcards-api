@@ -3,7 +3,6 @@ import { pick } from 'remeda'
 
 import { FileUploadService } from '../../../infrastructure/file-upload-service/file-upload.service'
 import { UsersRepository } from '../../users/infrastructure/users.repository'
-import { UsersService } from '../../users/services/users.service'
 import { UpdateUserDataDto } from '../dto/update-user-data.dto'
 import { UserEntity } from '../entities/auth.entity'
 
@@ -19,12 +18,11 @@ export class UpdateUserCommand {
 export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
   constructor(
     private readonly usersRepository: UsersRepository,
-    private readonly usersService: UsersService,
     private readonly fileUploadService: FileUploadService
   ) {}
 
   async execute(command: UpdateUserCommand): Promise<UserEntity | null> {
-    let avatar
+    let avatar: string | null
 
     if (command.avatar) {
       const addAvatarImagePromise = this.fileUploadService.uploadFile(
@@ -40,7 +38,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
     }
 
     const updatedUser = await this.usersRepository.updateUser(command.userId, {
-      ...command.user,
+      name: command.user.name.trim(),
       avatar,
     })
 
