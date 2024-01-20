@@ -187,6 +187,10 @@ export class DecksController {
   @ApiNotFoundResponse({ description: 'Card not found' })
   @HttpCode(HttpStatus.OK)
   @ApiNoContentResponse({ description: 'Grade saved' })
+  @ApiOkResponse({
+    description: 'A new random card in the deck. Will never return the same card that was sent',
+    type: Card,
+  })
   @Post(':id/learn')
   @ApiOperation({
     description: 'Save the grade of a card',
