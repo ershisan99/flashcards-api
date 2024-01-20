@@ -8,7 +8,7 @@ import {
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import { CreateCardDto, GetAllCardsInDeckDto, UpdateCardDto } from '../dto'
-import { CardWithGrade, PaginatedCardsWithGrade } from '../entities/cards.entity'
+import { CardWithGrades, PaginatedCardsWithGrades } from '../entities/cards.entity'
 
 @Injectable()
 export class CardsRepository {
@@ -50,7 +50,7 @@ export class CardsRepository {
       itemsPerPage,
       orderBy,
     }: GetAllCardsInDeckDto
-  ): Promise<PaginatedCardsWithGrade> {
+  ): Promise<PaginatedCardsWithGrades> {
     if (!orderBy || orderBy === 'null') {
       orderBy = 'updated-desc'
     }
@@ -92,7 +92,7 @@ export class CardsRepository {
           itemsPerPage
         )) satisfies Array<any>
 
-        const cards: CardWithGrade[] = cardsRaw.map(({ userGrade, ...card }) => ({
+        const cards: CardWithGrades[] = cardsRaw.map(({ userGrade, ...card }) => ({
           ...card,
           grades: [
             {
@@ -196,8 +196,8 @@ export class CardsRepository {
     }
   }
 
-  private async getSmartRandomCard(cards: Array<CardWithGrade>): Promise<CardWithGrade> {
-    const selectionPool: Array<CardWithGrade> = []
+  private async getSmartRandomCard(cards: Array<CardWithGrades>): Promise<CardWithGrades> {
+    const selectionPool: Array<CardWithGrades> = []
 
     cards.forEach(card => {
       // Calculate the average grade for the card
@@ -218,9 +218,9 @@ export class CardsRepository {
   }
 
   private async getNotDuplicateRandomCard(
-    cards: Array<CardWithGrade>,
+    cards: Array<CardWithGrades>,
     previousCardId: string
-  ): Promise<CardWithGrade> {
+  ): Promise<CardWithGrades> {
     const randomCard = await this.getSmartRandomCard(cards)
 
     if (!randomCard) {

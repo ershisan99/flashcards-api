@@ -31,7 +31,7 @@ import { Pagination } from '../../infrastructure/common/pagination/pagination.se
 import { SaveGradeDto } from '../auth/dto'
 import { JwtAuthGuard } from '../auth/guards'
 import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
-import { Card, PaginatedCards } from '../cards/entities/cards.entity'
+import { Card, CardWithGrade, PaginatedCardsWithGrade } from '../cards/entities/cards.entity'
 
 import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
 import { GetRandomCardDto } from './dto/get-random-card.dto'
@@ -134,7 +134,7 @@ export class DecksController {
     @Param('id') id: string,
     @Req() req,
     @Query() query: GetAllCardsInDeckDto
-  ): Promise<PaginatedCards> {
+  ): Promise<PaginatedCardsWithGrade> {
     const finalQuery = Pagination.getPaginationData(query)
 
     return this.commandBus.execute(new GetAllCardsInDeckCommand(req.user.id, id, finalQuery))
@@ -176,7 +176,7 @@ export class DecksController {
     @Param('id') id: string,
     @Req() req,
     @Query() query: GetRandomCardDto
-  ): Promise<Card> {
+  ): Promise<CardWithGrade> {
     return this.commandBus.execute(
       new GetRandomCardInDeckCommand(req.user.id, id, query.previousCardId)
     )
@@ -189,14 +189,14 @@ export class DecksController {
   @ApiNoContentResponse({ description: 'Grade saved' })
   @ApiOkResponse({
     description: 'A new random card in the deck. Will never return the same card that was sent',
-    type: Card,
+    type: CardWithGrade,
   })
   @Post(':id/learn')
   @ApiOperation({
     description: 'Save the grade of a card',
     summary: 'Save the grade of a card',
   })
-  async saveGrade(@Req() req, @Body() body: SaveGradeDto) {
+  async saveGrade(@Req() req, @Body() body: SaveGradeDto): Promise<CardWithGrade> {
     return await this.commandBus.execute(
       new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
     )

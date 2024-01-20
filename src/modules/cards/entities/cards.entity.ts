@@ -20,11 +20,20 @@ export class PaginatedCards {
   pagination: Pagination
 }
 
+export class PaginatedCardsWithGrades {
+  pagination: Pagination
+  items: CardWithGrades[]
+}
+
+export class CardWithGrades extends Card {
+  grades?: Array<{ grade: number }>
+}
+
 export class PaginatedCardsWithGrade {
   pagination: Pagination
   items: CardWithGrade[]
 }
 
 export class CardWithGrade extends Card {
-  grades?: Array<{ grade: number }>
+  grade: number
 }

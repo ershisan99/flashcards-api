@@ -26,7 +26,7 @@ import {
 import { JwtAuthGuard } from '../auth/guards'
 
 import { UpdateCardDto } from './dto'
-import { Card } from './entities/cards.entity'
+import { Card, CardWithGrade } from './entities/cards.entity'
 import { DeleteCardByIdCommand, GetDeckByIdCommand, UpdateCardCommand } from './use-cases'
 
 @ApiTags('Cards')
@@ -39,7 +39,7 @@ export class CardsController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Card not found' })
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<Card> {
+  findOne(@Param('id') id: string): Promise<CardWithGrade> {
     return this.commandBus.execute(new GetDeckByIdCommand(id))
   }
 

@@ -12,11 +12,11 @@ export enum DecksOrderBy {
   'name-asc' = 'name-asc',
   'author.name-asc' = 'author.name-asc',
   'created-asc' = 'created-asc',
-  'cardsCount-decs' = 'cardsCount-decs',
-  'updated-decs' = 'updated-decs',
-  'name-decs' = 'name-decs',
-  'author.name-decs' = 'author.name-decs',
-  'created-decs' = 'created-decs',
+  'cardsCount-desc' = 'cardsCount-desc',
+  'updated-desc' = 'updated-desc',
+  'name-desc' = 'name-desc',
+  'author.name-desc' = 'author.name-desc',
+  'created-desc' = 'created-desc',
 }
 
 export class GetAllDecksDto extends PaginationDto {
@@ -50,7 +50,9 @@ export class GetAllDecksDto extends PaginationDto {
   @IsOrderBy()
   @ApiProperty({
     enum: DecksOrderBy,
+    required: false,
   })
-  @IsEnum(DecksOrderBy)
+  @IsOptional()
+  @IsEnum(DecksOrderBy, {})
   orderBy?: DecksOrderBy
 }

@@ -3,7 +3,11 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs'
 import { pick } from 'remeda'
 
 import { GetAllCardsInDeckDto } from '../../cards/dto'
-import { PaginatedCards, PaginatedCardsWithGrade } from '../../cards/entities/cards.entity'
+import {
+  PaginatedCards,
+  PaginatedCardsWithGrade,
+  PaginatedCardsWithGrades,
+} from '../../cards/entities/cards.entity'
 import { CardsRepository } from '../../cards/infrastructure/cards.repository'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
@@ -21,7 +25,8 @@ export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDe
     private readonly cardsRepository: CardsRepository,
     private readonly decksRepository: DecksRepository
   ) {}
-  private transformGrade(cards: PaginatedCardsWithGrade): PaginatedCards {
+
+  private transformGrade(cards: PaginatedCardsWithGrades): PaginatedCardsWithGrade {
     return {
       ...cards,
       items: cards.items.map(card =>
@@ -31,18 +36,18 @@ export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDe
             grade: card.grades[0]?.grade || 0,
           },
           [
-            'id',
-            'question',
             'answer',
-            'deckId',
-            'questionImg',
             'answerImg',
-            'questionVideo',
             'answerVideo',
             'created',
-            'updated',
-            'shots',
+            'deckId',
             'grade',
+            'id',
+            'question',
+            'questionImg',
+            'questionVideo',
+            'shots',
+            'updated',
             'userId',
           ]
         )
