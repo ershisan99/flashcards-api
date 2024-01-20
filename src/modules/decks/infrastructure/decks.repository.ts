@@ -1,4 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
+import { omit } from 'remeda'
 
 import { PrismaService } from '../../../prisma.service'
 import { GetAllDecksDto } from '../dto'
@@ -172,14 +173,18 @@ export class DecksRepository {
       const modifiedDecks = decks.map(deck => {
         const cardsCount = deck.cardsCount
 
-        return {
-          ...deck,
-          cardsCount: typeof cardsCount === 'bigint' ? Number(cardsCount) : cardsCount,
-          author: {
-            id: deck.authorId,
-            name: deck.authorName,
+        return omit(
+          {
+            ...deck,
+            cardsCount: typeof cardsCount === 'bigint' ? Number(cardsCount) : cardsCount,
+            isPrivate: !!deck.isPrivate,
+            author: {
+              id: deck.authorId,
+              name: deck.authorName,
+            },
           },
-        }
+          ['authorId', 'authorName']
+        )
       })
       const max = await this.prisma
         .$queryRaw`SELECT MAX(card_count) as maxCardsCount FROM (SELECT COUNT(*) as card_count FROM card GROUP BY deckId) AS card_counts;`
