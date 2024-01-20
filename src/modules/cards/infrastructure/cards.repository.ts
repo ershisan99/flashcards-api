@@ -18,36 +18,21 @@ export class CardsRepository {
 
   async createCard(deckId: string, userId: string, card: CreateCardDto) {
     try {
-      return await this.prisma.$transaction(async tx => {
-        const created = await tx.card.create({
-          data: {
-            author: {
-              connect: {
-                id: userId,
-              },
-            },
-            decks: {
-              connect: {
-                id: deckId,
-              },
-            },
-
-            ...card,
-          },
-        })
-
-        await tx.deck.update({
-          where: {
-            id: deckId,
-          },
-          data: {
-            cardsCount: {
-              increment: 1,
+      return await this.prisma.card.create({
+        data: {
+          author: {
+            connect: {
+              id: userId,
             },
           },
-        })
+          decks: {
+            connect: {
+              id: deckId,
+            },
+          },
 
-        return created
+          ...card,
+        },
       })
     } catch (e) {
       this.logger.error(e?.message)
@@ -186,25 +171,10 @@ export class CardsRepository {
 
   public async deleteCardById(id: string) {
     try {
-      return await this.prisma.$transaction(async tx => {
-        const deleted = await tx.card.delete({
-          where: {
-            id,
-          },
-        })
-
-        await tx.deck.update({
-          where: {
-            id: deleted.deckId,
-          },
-          data: {
-            cardsCount: {
-              decrement: 1,
-            },
-          },
-        })
-
-        return deleted
+      return await this.prisma.card.delete({
+        where: {
+          id,
+        },
       })
     } catch (e) {
       this.logger.error(e?.message)

@@ -1,7 +1,5 @@
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common'
 
-import { createPrismaOrderBy } from '../../../infrastructure/common/helpers/get-order-by-object'
-import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import { GetAllDecksDto } from '../dto'
 import { Deck, PaginatedDecks } from '../entities/deck.entity'
@@ -24,7 +22,7 @@ export class DecksRepository {
     isPrivate?: boolean
   }): Promise<Deck> {
     try {
-      return await this.prisma.deck.create({
+      const result = await this.prisma.deck.create({
         data: {
           author: {
             connect: {
@@ -37,6 +35,11 @@ export class DecksRepository {
           isPrivate,
         },
         include: {
+          _count: {
+            select: {
+              card: true,
+            },
+          },
           author: {
             select: {
               id: true,
@@ -45,6 +48,8 @@ export class DecksRepository {
           },
         },
       })
+
+      return { ...result, cardsCount: result._count.card }
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
@@ -62,62 +67,133 @@ export class DecksRepository {
     orderBy,
   }: GetAllDecksDto): Promise<PaginatedDecks> {
     if (!orderBy || orderBy === 'null') {
-      orderBy = 'updated-desc'
+      orderBy = 'updated-desc' // Adjust this based on your actual ordering requirements
+    }
+    let orderField = 'd.updated' // default order field
+    let orderDirection = 'DESC' // default order direction
+
+    if (orderBy) {
+      const orderByParts = orderBy.split('-')
+
+      if (orderByParts.length === 2) {
+        const field = orderByParts[0]
+        const direction = orderByParts[1].toUpperCase()
+
+        // Validate the field and direction
+        if (
+          ['cardsCount', 'updated', 'name', 'author.name', 'created'].includes(field) &&
+          ['ASC', 'DESC'].includes(direction)
+        ) {
+          if (field === 'cardsCount') {
+            orderField = 'cardsCount'
+          } else if (field === 'author.name') {
+            orderField = 'a.name'
+          } else {
+            orderField = `d.${field}`
+          }
+
+          orderDirection = direction
+        }
+      }
     }
     try {
-      const where = {
-        cardsCount: {
-          gte: minCardsCount ? Number(minCardsCount) : undefined,
-          lte: maxCardsCount ? Number(maxCardsCount) : undefined,
-        },
-        name: {
-          contains: name,
-        },
-        author: {
-          id: authorId || undefined,
-        },
-        OR: [
-          {
-            AND: [
-              {
-                isPrivate: true,
-              },
-              {
-                userId: userId,
-              },
-            ],
-          },
-          {
-            isPrivate: false,
-          },
-        ],
-      }
+      // Prepare the where clause conditions
+      const conditions = []
 
-      const [count, items, max] = await this.prisma.$transaction([
-        this.prisma.deck.count({
-          where,
-        }),
-        this.prisma.deck.findMany({
-          where,
-          orderBy: createPrismaOrderBy(orderBy),
-          include: {
-            author: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
-          },
-          skip: (currentPage - 1) * itemsPerPage,
-          take: itemsPerPage,
-        }),
-        this.prisma
-          .$queryRaw`SELECT MAX(card_count) as maxCardsCount FROM (SELECT COUNT(*) as card_count FROM card GROUP BY deckId) AS card_counts;`,
-      ])
+      if (name) conditions.push(`d.name LIKE CONCAT('%', ?, '%')`)
+      if (authorId) conditions.push(`d.userId = ?`)
+      if (userId) conditions.push(`(d.isPrivate = FALSE OR (d.isPrivate = TRUE AND d.userId = ?))`)
 
+      // Prepare the having clause for card count range
+      const havingConditions = []
+
+      if (minCardsCount != null) havingConditions.push(`COUNT(c.id) >= ?`)
+      if (maxCardsCount != null) havingConditions.push(`COUNT(c.id) <= ?`)
+
+      // Construct the raw SQL query for fetching decks
+      const query = `
+        SELECT 
+          d.*, 
+          COUNT(c.id) AS cardsCount,
+          a.id AS authorId,
+          a.name AS authorName
+        FROM deck AS d
+        LEFT JOIN card AS c ON d.id = c.deckId
+        LEFT JOIN user AS a ON d.userId = a.id
+        ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
+        GROUP BY d.id
+        ${havingConditions.length ? `HAVING ${havingConditions.join(' AND ')}` : ''}
+        ORDER BY ${orderField} ${orderDirection} 
+        LIMIT ? OFFSET ?;
+      `
+
+      // Parameters for fetching decks
+      const deckQueryParams = [
+        ...(name ? [name] : []),
+        ...(authorId ? [authorId] : []),
+        ...(userId ? [userId] : []),
+        ...(minCardsCount != null ? [minCardsCount] : []),
+        ...(maxCardsCount != null ? [maxCardsCount] : []),
+        itemsPerPage,
+        (currentPage - 1) * itemsPerPage,
+      ]
+
+      // Execute the raw SQL query for fetching decks
+      const decks = await this.prisma.$queryRawUnsafe<
+        Array<
+          Deck & {
+            authorId: string
+            authorName: string
+          }
+        >
+      >(query, ...deckQueryParams)
+      // Construct the raw SQL query for total count
+      const countQuery = `
+        SELECT COUNT(DISTINCT d.id) AS total
+        FROM deck AS d
+        LEFT JOIN card AS c ON d.id = c.deckId
+        ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
+        ${havingConditions.length ? `GROUP BY d.id HAVING ${havingConditions.join(' AND ')}` : ''};
+    `
+
+      // Parameters for total count query
+      const countQueryParams = [
+        ...(name ? [name] : []),
+        ...(authorId ? [authorId] : []),
+        ...(userId ? [userId] : []),
+        ...(minCardsCount != null ? [minCardsCount] : []),
+        ...(maxCardsCount != null ? [maxCardsCount] : []),
+      ]
+
+      // Execute the raw SQL query for total count
+      const totalResult = await this.prisma.$queryRawUnsafe<any[]>(countQuery, ...countQueryParams)
+
+      const total = totalResult.length
+      const modifiedDecks = decks.map(deck => {
+        const cardsCount = deck.cardsCount
+
+        return {
+          ...deck,
+          cardsCount: typeof cardsCount === 'bigint' ? Number(cardsCount) : cardsCount,
+          author: {
+            id: deck.authorId,
+            name: deck.authorName,
+          },
+        }
+      })
+      const max = await this.prisma
+        .$queryRaw`SELECT MAX(card_count) as maxCardsCount FROM (SELECT COUNT(*) as card_count FROM card GROUP BY deckId) AS card_counts;`
+
+      // Return the result with pagination data
       return {
+        items: modifiedDecks,
+        pagination: {
+          totalItems: total,
+          currentPage,
+          itemsPerPage,
+          totalPages: Math.ceil(total / itemsPerPage),
+        },
         maxCardsCount: Number(max[0].maxCardsCount),
-        ...Pagination.transformPaginationData([count, items], { currentPage, itemsPerPage }),
       }
     } catch (e) {
       this.logger.error(e?.message)
@@ -127,11 +203,20 @@ export class DecksRepository {
 
   public async findDeckById(id: string): Promise<Deck> {
     try {
-      return await this.prisma.deck.findUnique({
+      const result = await this.prisma.deck.findUnique({
         where: {
           id,
         },
+        include: {
+          _count: {
+            select: {
+              card: true,
+            },
+          },
+        },
       })
+
+      return { ...result, cardsCount: result._count.card }
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
@@ -146,11 +231,20 @@ export class DecksRepository {
         },
       })
 
-      return await this.prisma.deck.findUnique({
+      const result = await this.prisma.deck.findUnique({
+        include: {
+          _count: {
+            select: {
+              card: true,
+            },
+          },
+        },
         where: {
           id: card.deckId,
         },
       })
+
+      return { ...result, cardsCount: result._count.card }
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
@@ -175,12 +269,17 @@ export class DecksRepository {
     data: { name?: string; cover?: string; isPrivate?: boolean }
   ): Promise<Deck> {
     try {
-      return await this.prisma.deck.update({
+      const result = await this.prisma.deck.update({
         where: {
           id,
         },
         data,
         include: {
+          _count: {
+            select: {
+              card: true,
+            },
+          },
           author: {
             select: {
               id: true,
@@ -189,6 +288,8 @@ export class DecksRepository {
           },
         },
       })
+
+      return { ...result, cardsCount: result._count.card }
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)

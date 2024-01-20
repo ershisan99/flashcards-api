@@ -103,20 +103,18 @@ model card {
 }
 
 model deck {
-  id         String   @id @default(cuid())
-  userId     String
-  name       String
-  isPrivate  Boolean  @default(false)
-  shots      Int      @default(0)
-  cover      String?  @db.VarChar(500)
-  isDeleted  Boolean?
-  isBlocked  Boolean?
-  created    DateTime @default(now())
-  updated    DateTime @updatedAt
-  cardsCount Int      @default(0)
-  author     user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card       card[]
-  grades     grade[]
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  isPrivate Boolean  @default(false)
+  cover     String?  @db.VarChar(500)
+  isDeleted Boolean?
+  isBlocked Boolean?
+  created   DateTime @default(now())
+  updated   DateTime @updatedAt
+  author    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card      card[]
+  grades    grade[]
 
   @@index([userId])
 }

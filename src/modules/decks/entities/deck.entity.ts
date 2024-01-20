@@ -5,7 +5,6 @@ export class Deck {
   userId: string
   name: string
   isPrivate: boolean
-  shots: number
   cover: string | null
   created: Date
   updated: Date
