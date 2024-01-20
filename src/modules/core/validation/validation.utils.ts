@@ -6,7 +6,10 @@ import { validationErrorsMapper, ValidationPipeErrorType } from '../../../settin
 import { DomainResultNotification, ResultNotification } from './notification'
 
 export class DomainError extends Error {
-  constructor(message: string, public resultNotification: ResultNotification) {
+  constructor(
+    message: string,
+    public resultNotification: ResultNotification
+  ) {
     super(message)
   }
 }

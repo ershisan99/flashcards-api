@@ -24,7 +24,10 @@ export class ResultNotification<T = null> {
 }
 
 export class NotificationExtension {
-  constructor(public message: string, public key: string | null) {}
+  constructor(
+    public message: string,
+    public key: string | null
+  ) {}
 }
 
 export class DomainResultNotification<TData = null> extends ResultNotification<TData> {

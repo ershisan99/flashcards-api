@@ -21,7 +21,10 @@ import { UsersService } from '../services/users.service'
 @ApiTags('Admin')
 @Controller('users')
 export class UsersController {
-  constructor(private usersService: UsersService, private commandBus: CommandBus) {}
+  constructor(
+    private usersService: UsersService,
+    private commandBus: CommandBus
+  ) {}
 
   @Get()
   async findAll(@Query() query) {

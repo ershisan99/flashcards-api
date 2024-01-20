@@ -5,7 +5,10 @@ import { UsersRepository } from '../../users/infrastructure/users.repository'
 import { UsersService } from '../../users/services/users.service'
 
 export class ResetPasswordCommand {
-  constructor(public readonly resetPasswordToken: string, public readonly newPassword: string) {}
+  constructor(
+    public readonly resetPasswordToken: string,
+    public readonly newPassword: string
+  ) {}
 }
 
 @CommandHandler(ResetPasswordCommand)

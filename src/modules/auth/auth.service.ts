@@ -10,7 +10,10 @@ import { UsersRepository } from '../users/infrastructure/users.repository'
 
 @Injectable()
 export class AuthService {
-  constructor(private usersRepository: UsersRepository, private prisma: PrismaService) {}
+  constructor(
+    private usersRepository: UsersRepository,
+    private prisma: PrismaService
+  ) {}
 
   async createJwtTokensPair(userId: string, rememberMe?: boolean) {
     const accessSecretKey = process.env.ACCESS_JWT_SECRET_KEY

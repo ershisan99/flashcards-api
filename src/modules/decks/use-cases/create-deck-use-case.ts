@@ -6,7 +6,10 @@ import { Deck } from '../entities/deck.entity'
 import { DecksRepository } from '../infrastructure/decks.repository'
 
 export class CreateDeckCommand {
-  constructor(public readonly deck: CreateDeckDto, public readonly cover: Express.Multer.File) {}
+  constructor(
+    public readonly deck: CreateDeckDto,
+    public readonly cover: Express.Multer.File
+  ) {}
 }
 
 @CommandHandler(CreateDeckCommand)

@@ -5,7 +5,10 @@ import * as jwt from 'jsonwebtoken'
 import { AuthRepository } from '../infrastructure/auth.repository'
 
 export class RefreshTokenCommand {
-  constructor(public readonly userId: string, public readonly shortAccessToken: boolean) {}
+  constructor(
+    public readonly userId: string,
+    public readonly shortAccessToken: boolean
+  ) {}
 }
 
 @CommandHandler(RefreshTokenCommand)

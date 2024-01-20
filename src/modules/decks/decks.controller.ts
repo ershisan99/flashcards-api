@@ -192,13 +192,9 @@ export class DecksController {
     description: 'Save the grade of a card',
     summary: 'Save the grade of a card',
   })
-  async saveGrade(@Param('id') deckId: string, @Req() req, @Body() body: SaveGradeDto) {
-    const saved = await this.commandBus.execute(
-      new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
-    )
-
+  async saveGrade(@Req() req, @Body() body: SaveGradeDto) {
     return await this.commandBus.execute(
-      new GetRandomCardInDeckCommand(req.user.id, saved.deckId, saved.id)
+      new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
     )
   }
 }

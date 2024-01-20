@@ -38,7 +38,10 @@ class AuthSettings {
 }
 
 export class AppSettings {
-  constructor(public env: EnvironmentSettings, public auth: AuthSettings) {}
+  constructor(
+    public env: EnvironmentSettings,
+    public auth: AuthSettings
+  ) {}
 }
 const env = new EnvironmentSettings((process.env.NODE_ENV || 'DEVELOPMENT') as EnvironmentsTypes)
 const auth = new AuthSettings(process.env)

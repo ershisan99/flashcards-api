@@ -25,7 +25,7 @@ export class IsOrderByConstraint implements ValidatorConstraintInterface {
     return true
   }
 
-  defaultMessage(args: ValidationArguments) {
+  defaultMessage(_args: ValidationArguments) {
     return 'Invalid format. Expected format is "key-direction". Direction must be "asc" or "desc".'
   }
 }
