@@ -1,9 +1,23 @@
-import { ApiHideProperty } from '@nestjs/swagger'
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsNumber, IsOptional, IsUUID } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional, IsUUID } from 'class-validator'
 
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
 import { IsOptionalOrEmptyString, IsOrderBy } from '../../../infrastructure/decorators'
+
+export enum DecksOrderBy {
+  'null' = 'null',
+  'cardsCount-asc' = 'cardsCount-asc',
+  'updated-asc' = 'updated-asc',
+  'name-asc' = 'name-asc',
+  'author.name-asc' = 'author.name-asc',
+  'created-asc' = 'created-asc',
+  'cardsCount-decs' = 'cardsCount-decs',
+  'updated-decs' = 'updated-decs',
+  'name-decs' = 'name-decs',
+  'author.name-decs' = 'author.name-decs',
+  'created-decs' = 'created-decs',
+}
 
 export class GetAllDecksDto extends PaginationDto {
   @IsOptional()
@@ -34,5 +48,9 @@ export class GetAllDecksDto extends PaginationDto {
    * @example "name-desc"
    * */
   @IsOrderBy()
-  orderBy?: string | null
+  @ApiProperty({
+    enum: DecksOrderBy,
+  })
+  @IsEnum(DecksOrderBy)
+  orderBy?: DecksOrderBy
 }

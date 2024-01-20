@@ -6,7 +6,7 @@ export class CreateDeckDto {
   @Length(3, 30)
   name: string
   /**
-   * Cover image (binary)
+   * Cover image (has to be sent inside FormData, does NOT accept base64)
    */
   @IsOptional()
   @ApiProperty({ type: 'string', format: 'binary' })

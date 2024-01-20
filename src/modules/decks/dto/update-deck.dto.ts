@@ -14,6 +14,9 @@ export class UpdateDeckDto extends PartialType(CreateDeckDto) {
   @IsBoolean()
   isPrivate?: boolean
 
+  /**
+   * Cover image (has to be sent inside FormData, does NOT accept base64)
+   */
   @IsOptionalOrEmptyString()
   @ApiProperty({ type: 'string', format: 'binary' })
   cover?: string

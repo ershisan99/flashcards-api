@@ -2,7 +2,7 @@ import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common
 import { omit } from 'remeda'
 
 import { PrismaService } from '../../../prisma.service'
-import { GetAllDecksDto } from '../dto'
+import { DecksOrderBy, GetAllDecksDto } from '../dto'
 import { Deck, PaginatedDecks } from '../entities/deck.entity'
 
 @Injectable()
@@ -68,7 +68,7 @@ export class DecksRepository {
     orderBy,
   }: GetAllDecksDto): Promise<PaginatedDecks> {
     if (!orderBy || orderBy === 'null') {
-      orderBy = 'updated-desc' // Adjust this based on your actual ordering requirements
+      orderBy = DecksOrderBy['updated-desc'] // Adjust this based on your actual ordering requirements
     }
     let orderField = 'd.updated' // default order field
     let orderDirection = 'DESC' // default order direction
