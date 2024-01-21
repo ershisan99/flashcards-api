@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common'
+import { Logger, VersioningType } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import * as cookieParser from 'cookie-parser'
@@ -16,7 +16,10 @@ async function bootstrap() {
   })
   app.use(cookieParser())
 
-  app.setGlobalPrefix('v1')
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  })
   const config = new DocumentBuilder()
     .setTitle('Flashcards')
     .setDescription('Flashcards API')

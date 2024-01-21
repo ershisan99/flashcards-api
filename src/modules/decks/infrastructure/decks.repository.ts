@@ -57,6 +57,16 @@ export class DecksRepository {
     }
   }
 
+  async findMinMaxCards(): Promise<{ min: number; max: number }> {
+    const result = await this.prisma
+      .$queryRaw`SELECT MAX(card_count) as maxCardsCount, MIN(card_count) as minCardsCount FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card.deckId GROUP BY deck.id) AS card_counts;`
+
+    return {
+      max: Number(result[0].maxCardsCount),
+      min: Number(result[0].minCardsCount),
+    }
+  }
+
   async findAllDecks({
     name = undefined,
     authorId = undefined,
@@ -190,8 +200,6 @@ export class DecksRepository {
           ['authorId', 'authorName']
         )
       })
-      const max = await this.prisma
-        .$queryRaw`SELECT MAX(card_count) as maxCardsCount FROM (SELECT COUNT(*) as card_count FROM card GROUP BY deckId) AS card_counts;`
 
       // Return the result with pagination data
       return {
@@ -202,7 +210,6 @@ export class DecksRepository {
           itemsPerPage,
           totalPages: Math.ceil(total / itemsPerPage),
         },
-        maxCardsCount: Number(max[0].maxCardsCount),
       }
     } catch (e) {
       this.logger.error(e?.message)

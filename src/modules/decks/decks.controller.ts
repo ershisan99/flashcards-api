@@ -14,6 +14,7 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  Version,
 } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
@@ -35,14 +36,17 @@ import { Card, CardWithGrade, PaginatedCardsWithGrade } from '../cards/entities/
 
 import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
 import { GetRandomCardDto } from './dto/get-random-card.dto'
-import { Deck, DeckWithAuthor, PaginatedDecks } from './entities/deck.entity'
+import { Deck, DeckWithAuthor, PaginatedDecksWithMaxCardsCount } from './entities/deck.entity'
+import { MinMaxCards } from './entities/min-max-cards.entity'
 import {
   CreateCardCommand,
   CreateDeckCommand,
   DeleteDeckByIdCommand,
   GetAllCardsInDeckCommand,
-  GetAllDecksCommand,
+  GetAllDecksV1Command,
+  GetAllDecksV2Command,
   GetDeckByIdCommand,
+  GetMinMaxCardsUseCaseCommand,
   GetRandomCardInDeckCommand,
   SaveGradeCommand,
   UpdateDeckCommand,
@@ -54,14 +58,43 @@ export class DecksController {
   constructor(private commandBus: CommandBus) {}
 
   @HttpCode(HttpStatus.PARTIAL_CONTENT)
-  @ApiOperation({ description: 'Retrieve paginated decks list.', summary: 'Paginated decks list' })
+  @ApiOperation({
+    description: 'Deprecated. Use v2 in combination with /min-max-cards request',
+    summary: 'Paginated decks list',
+    deprecated: true,
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @Get()
-  findAll(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecks> {
+  findAllV1(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecksWithMaxCardsCount> {
     const finalQuery = Pagination.getPaginationData(query)
 
-    return this.commandBus.execute(new GetAllDecksCommand({ ...finalQuery, userId: req.user.id }))
+    return this.commandBus.execute(new GetAllDecksV1Command({ ...finalQuery, userId: req.user.id }))
+  }
+
+  @HttpCode(HttpStatus.PARTIAL_CONTENT)
+  @ApiOperation({ description: 'Retrieve paginated decks list.', summary: 'Paginated decks list' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(JwtAuthGuard)
+  @Version('2')
+  @Get()
+  findAllV2(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecksWithMaxCardsCount> {
+    const finalQuery = Pagination.getPaginationData(query)
+
+    return this.commandBus.execute(new GetAllDecksV2Command({ ...finalQuery, userId: req.user.id }))
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    description: 'Retrieve the minimum and maximum amount of cards in a deck.',
+    summary: 'Minimum and maximum amount of cards in a deck',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @UseGuards(JwtAuthGuard)
+  @Version('2')
+  @Get('min-max-cards')
+  findMinMaxCards(): Promise<MinMaxCards> {
+    return this.commandBus.execute(new GetMinMaxCardsUseCaseCommand())
   }
 
   @ApiConsumes('multipart/form-data')

@@ -20,8 +20,13 @@ export class DeckAuthor {
   name: string
 }
 
-export class PaginatedDecks {
+export class PaginatedDecksWithMaxCardsCount {
   items: DeckWithAuthor[]
   pagination: Pagination
   maxCardsCount: number
+}
+
+export class PaginatedDecks {
+  items: DeckWithAuthor[]
+  pagination: Pagination
 }
