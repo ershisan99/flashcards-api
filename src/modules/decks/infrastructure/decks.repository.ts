@@ -68,7 +68,7 @@ export class DecksRepository {
     orderBy,
   }: GetAllDecksDto): Promise<PaginatedDecks> {
     if (!orderBy || orderBy === 'null') {
-      orderBy = DecksOrderBy['updated-desc'] // Adjust this based on your actual ordering requirements
+      orderBy = DecksOrderBy['updated-desc']
     }
     let orderField = 'd.updated' // default order field
     let orderDirection = 'DESC' // default order direction
@@ -150,12 +150,16 @@ export class DecksRepository {
       >(query, ...deckQueryParams)
       // Construct the raw SQL query for total count
       const countQuery = `
-        SELECT COUNT(DISTINCT d.id) AS total
+    SELECT COUNT(*) AS total
+    FROM (
+        SELECT d.id
         FROM deck AS d
         LEFT JOIN card AS c ON d.id = c.deckId
         ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
-        ${havingConditions.length ? `GROUP BY d.id HAVING ${havingConditions.join(' AND ')}` : ''};
-    `
+        GROUP BY d.id
+        ${havingConditions.length ? `HAVING ${havingConditions.join(' AND ')}` : ''}
+    ) AS subquery;
+`
 
       // Parameters for total count query
       const countQueryParams = [
@@ -169,7 +173,7 @@ export class DecksRepository {
       // Execute the raw SQL query for total count
       const totalResult = await this.prisma.$queryRawUnsafe<any[]>(countQuery, ...countQueryParams)
 
-      const total = totalResult.length
+      const total = Number(totalResult[0]?.total) ?? 1
       const modifiedDecks = decks.map(deck => {
         const cardsCount = deck.cardsCount
 
