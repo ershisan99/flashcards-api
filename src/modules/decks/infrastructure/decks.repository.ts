@@ -247,6 +247,8 @@ export class DecksRepository {
         },
       })
 
+      if (!card) return null
+
       const result = await this.prisma.deck.findUnique({
         include: {
           _count: {
