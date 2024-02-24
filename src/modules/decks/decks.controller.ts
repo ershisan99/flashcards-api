@@ -36,7 +36,12 @@ import { Card, CardWithGrade, PaginatedCardsWithGrade } from '../cards/entities/
 
 import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
 import { GetRandomCardDto } from './dto/get-random-card.dto'
-import { Deck, DeckWithAuthor, PaginatedDecksWithMaxCardsCount } from './entities/deck.entity'
+import {
+  Deck,
+  DeckWithAuthor,
+  PaginatedDecks,
+  PaginatedDecksWithMaxCardsCount,
+} from './entities/deck.entity'
 import { MinMaxCards } from './entities/min-max-cards.entity'
 import {
   CreateCardCommand,
@@ -78,7 +83,7 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @Version('2')
   @Get()
-  findAllV2(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecksWithMaxCardsCount> {
+  findAllV2(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecks> {
     const finalQuery = Pagination.getPaginationData(query)
 
     return this.commandBus.execute(new GetAllDecksV2Command({ ...finalQuery, userId: req.user.id }))
