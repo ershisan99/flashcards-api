@@ -42,7 +42,7 @@ export class UsersController {
     return users
   }
 
-  //@UseGuards(BaseAuthGuard)
+  @UseGuards(BaseAuthGuard)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     return await this.commandBus.execute(
