@@ -61,8 +61,6 @@ export class DecksRepository {
     const result = await this.prisma
       .$queryRaw`SELECT MAX(card_count) as "maxCardsCount", MIN(card_count) as "minCardsCount" FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
 
-    console.log(result)
-
     return {
       max: Number(result[0].maxCardsCount),
       min: Number(result[0].minCardsCount),

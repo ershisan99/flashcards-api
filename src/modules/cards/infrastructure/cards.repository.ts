@@ -113,7 +113,6 @@ export class CardsRepository {
           ...queryParams
         )) satisfies Array<any>
 
-        console.log('123', sqlQuery, queryParams)
         const cards: CardWithGrades[] = cardsRaw.map(({ userGrade, ...card }) => ({
           ...card,
           grades: [
