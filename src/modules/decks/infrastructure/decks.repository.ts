@@ -59,7 +59,7 @@ export class DecksRepository {
 
   async findMinMaxCards(): Promise<{ min: number; max: number }> {
     const result = await this.prisma
-      .$queryRaw`SELECT MAX(card_count) as maxCardsCount, MIN(card_count) as minCardsCount FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card.deckId GROUP BY deck.id) AS card_counts;`
+      .$queryRaw`SELECT MAX(card_count) as maxCardsCount, MIN(card_count) as minCardsCount FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
 
     return {
       max: Number(result[0].maxCardsCount),
@@ -111,9 +111,10 @@ export class DecksRepository {
       // Prepare the where clause conditions
       const conditions = []
 
-      if (name) conditions.push(`d.name LIKE CONCAT('%', ?, '%')`)
-      if (authorId) conditions.push(`d.userId = ?`)
-      if (userId) conditions.push(`(d.isPrivate = FALSE OR (d.isPrivate = TRUE AND d.userId = ?))`)
+      if (name) conditions.push(`d.name LIKE ('%' || ? || '%')`)
+      if (authorId) conditions.push(`d."userId" = ?`)
+      if (userId)
+        conditions.push(`(d."isPrivate" = FALSE OR (d."isPrivate" = TRUE AND d."userId" = ?))`)
 
       // Prepare the having clause for card count range
       const havingConditions = []
@@ -123,19 +124,32 @@ export class DecksRepository {
 
       // Construct the raw SQL query for fetching decks
       const query = `
-        SELECT 
-          d.*, 
-          COUNT(c.id) AS cardsCount,
-          a.id AS authorId,
-          a.name AS authorName
-        FROM deck AS d
-        LEFT JOIN card AS c ON d.id = c.deckId
-        LEFT JOIN user AS a ON d.userId = a.id
-        ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
-        GROUP BY d.id
-        ${havingConditions.length ? `HAVING ${havingConditions.join(' AND ')}` : ''}
-        ORDER BY ${orderField} ${orderDirection} 
-        LIMIT ? OFFSET ?;
+SELECT 
+  d.*, 
+  COUNT(c.id) AS "cardsCount",
+  a."id" AS "authorId",
+  a."name" AS "authorName"
+FROM deck AS "d"
+LEFT JOIN "card" AS c ON d."id" = c."deckId"
+LEFT JOIN "user" AS a ON d."userId" = a.id
+${
+  conditions.length
+    ? `WHERE ${conditions.map((_, index) => `${_.replace('?', `$${index + 1}`)}`).join(' AND ')}`
+    : ''
+}
+GROUP BY d."id", a."id"
+${
+  havingConditions.length
+    ? `HAVING ${havingConditions
+        .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
+        .join(' AND ')}`
+    : ''
+}
+ORDER BY ${orderField} ${orderDirection} 
+LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
+        conditions.length + havingConditions.length + 2
+      };
+
       `
 
       // Parameters for fetching decks
@@ -164,10 +178,22 @@ export class DecksRepository {
     FROM (
         SELECT d.id
         FROM deck AS d
-        LEFT JOIN card AS c ON d.id = c.deckId
-        ${conditions.length ? `WHERE ${conditions.join(' AND ')}` : ''}
+        LEFT JOIN card AS c ON d.id = c."deckId"
+       ${
+         conditions.length
+           ? `WHERE ${conditions
+               .map((_, index) => `${_.replace('?', `$${index + 1}`)}`)
+               .join(' AND ')}`
+           : ''
+       }
         GROUP BY d.id
-        ${havingConditions.length ? `HAVING ${havingConditions.join(' AND ')}` : ''}
+     ${
+       havingConditions.length
+         ? `HAVING ${havingConditions
+             .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
+             .join(' AND ')}`
+         : ''
+     }
     ) AS subquery;
 `
 
