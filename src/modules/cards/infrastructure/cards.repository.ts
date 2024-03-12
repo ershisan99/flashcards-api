@@ -98,8 +98,8 @@ export class CardsRepository {
 
         const sqlQuery = `
   SELECT c.*, g.grade as "userGrade"
-  FROM card AS c
-  LEFT JOIN grade AS g ON c.id = g."cardId" AND g."userId" = $1
+  FROM flashcards.card AS c
+  LEFT JOIN flashcards.grade AS g ON c.id = g."cardId" AND g."userId" = $1
   WHERE c."deckId" = $2 AND (${whereClause})
   ORDER BY g."grade" ${direction === 'asc' ? 'ASC NULLS FIRST' : 'DESC NULLS LAST'}
   LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}

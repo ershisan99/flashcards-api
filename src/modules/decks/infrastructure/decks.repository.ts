@@ -59,7 +59,7 @@ export class DecksRepository {
 
   async findMinMaxCards(): Promise<{ min: number; max: number }> {
     const result = await this.prisma
-      .$queryRaw`SELECT MAX(card_count) as "maxCardsCount", MIN(card_count) as "minCardsCount" FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
+      .$queryRaw`SELECT MAX(card_count) as "maxCardsCount", MIN(card_count) as "minCardsCount" FROM (SELECT deck.id, COUNT(card.id) as card_count FROM flashcards.deck LEFT JOIN "flashcards"."card" ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
 
     return {
       max: Number(result[0].maxCardsCount),
@@ -129,9 +129,9 @@ SELECT
   COUNT(c.id) AS "cardsCount",
   a."id" AS "authorId",
   a."name" AS "authorName"
-FROM deck AS "d"
-LEFT JOIN "card" AS c ON d."id" = c."deckId"
-LEFT JOIN "user" AS a ON d."userId" = a.id
+FROM flashcards.deck AS "d"
+LEFT JOIN "flashcards"."card" AS c ON d."id" = c."deckId"
+LEFT JOIN "flashcards"."user" AS a ON d."userId" = a.id
 ${
   conditions.length
     ? `WHERE ${conditions.map((_, index) => `${_.replace('?', `$${index + 1}`)}`).join(' AND ')}`
@@ -177,8 +177,8 @@ LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
     SELECT COUNT(*) AS total
     FROM (
         SELECT d.id
-        FROM deck AS d
-        LEFT JOIN card AS c ON d.id = c."deckId"
+        FROM flashcards.deck AS d
+        LEFT JOIN flashcards.card AS c ON d.id = c."deckId"
        ${
          conditions.length
            ? `WHERE ${conditions
