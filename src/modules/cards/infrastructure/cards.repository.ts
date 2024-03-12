@@ -61,9 +61,11 @@ export class CardsRepository {
         },
         question: {
           contains: question || undefined,
+          mode: 'insensitive' as const,
         },
         answer: {
           contains: answer || undefined,
+          mode: 'insensitive' as const,
         },
       }
 
@@ -72,26 +74,46 @@ export class CardsRepository {
       if (key === 'grade') {
         const start = (currentPage - 1) * itemsPerPage
 
+        // Initialize parts of the WHERE clause
+        const whereParts = []
+        const queryParams: any[] = [userId, deckId]
+
+        // Add conditions for question and answer if they are provided
+        if (question) {
+          whereParts.push(`c."question" ILIKE $${queryParams.length + 1}`)
+          queryParams.push(`%${question}%`)
+        }
+
+        if (answer) {
+          whereParts.push(`c."answer" ILIKE $${queryParams.length + 1}`)
+          queryParams.push(`%${answer}%`)
+        }
+
+        // If no specific conditions are provided, match everything
+        if (whereParts.length === 0) {
+          whereParts.push('TRUE')
+        }
+
+        const whereClause = whereParts.join(' OR ')
+
         const sqlQuery = `
-          SELECT c.*, g.grade as userGrade
-          FROM card AS c
-          LEFT JOIN grade AS g ON c.id = g.cardId AND g.userId = ?
-          WHERE c.deckId = ? AND 
-            (c.question LIKE ? OR c.answer LIKE ?)
-          ORDER BY g.grade ${direction}
-          LIMIT ?, ? 
-          `
+  SELECT c.*, g.grade as "userGrade"
+  FROM card AS c
+  LEFT JOIN grade AS g ON c.id = g."cardId" AND g."userId" = $1
+  WHERE c."deckId" = $2 AND (${whereClause})
+  ORDER BY g."grade" ${direction === 'asc' ? 'ASC NULLS FIRST' : 'DESC NULLS LAST'}
+  LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
+`
+
+        // Add itemsPerPage and start to the queryParams
+        queryParams.push(itemsPerPage, start)
 
         const cardsRaw = (await this.prisma.$queryRawUnsafe(
           sqlQuery,
-          userId,
-          deckId,
-          `%${question || ''}%`,
-          `%${answer || ''}%`,
-          start,
-          itemsPerPage
+          ...queryParams
         )) satisfies Array<any>
 
+        console.log('123', sqlQuery, queryParams)
         const cards: CardWithGrades[] = cardsRaw.map(({ userGrade, ...card }) => ({
           ...card,
           grades: [

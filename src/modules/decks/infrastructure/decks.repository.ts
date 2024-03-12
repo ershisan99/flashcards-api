@@ -59,7 +59,9 @@ export class DecksRepository {
 
   async findMinMaxCards(): Promise<{ min: number; max: number }> {
     const result = await this.prisma
-      .$queryRaw`SELECT MAX(card_count) as maxCardsCount, MIN(card_count) as minCardsCount FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
+      .$queryRaw`SELECT MAX(card_count) as "maxCardsCount", MIN(card_count) as "minCardsCount" FROM (SELECT deck.id, COUNT(card.id) as card_count FROM deck LEFT JOIN card ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
+
+    console.log(result)
 
     return {
       max: Number(result[0].maxCardsCount),
@@ -111,7 +113,7 @@ export class DecksRepository {
       // Prepare the where clause conditions
       const conditions = []
 
-      if (name) conditions.push(`d.name LIKE ('%' || ? || '%')`)
+      if (name) conditions.push(`d.name ILIKE ('%' || ? || '%')`)
       if (authorId) conditions.push(`d."userId" = ?`)
       if (userId)
         conditions.push(`(d."isPrivate" = FALSE OR (d."isPrivate" = TRUE AND d."userId" = ?))`)
@@ -208,7 +210,6 @@ LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
 
       // Execute the raw SQL query for total count
       const totalResult = await this.prisma.$queryRawUnsafe<any[]>(countQuery, ...countQueryParams)
-
       const total = Number(totalResult[0]?.total) ?? 1
       const modifiedDecks = decks.map(deck => {
         const cardsCount = deck.cardsCount
