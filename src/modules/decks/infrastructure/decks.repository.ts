@@ -96,7 +96,7 @@ export class DecksRepository {
           ['ASC', 'DESC'].includes(direction)
         ) {
           if (field === 'cardsCount') {
-            orderField = 'cardsCount'
+            orderField = '"cardsCount"'
           } else if (field === 'author.name') {
             orderField = 'a.name'
           } else {
