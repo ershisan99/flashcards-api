@@ -1,6 +1,7 @@
 import { join } from 'path'
 import * as process from 'process'
 
+import { StorageModule } from '@it-incubator/storage-sdk'
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common'
 import { CqrsModule } from '@nestjs/cqrs'
 import { ServeStaticModule } from '@nestjs/serve-static'
@@ -27,6 +28,12 @@ import { ConfigModule } from './settings/config.module'
     PrismaModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'client'),
+    }),
+    StorageModule.register({
+      baseURL: process.env.STORAGE_SERVICE_URL,
+      headers: {
+        'service-token': process.env.STORAGE_SERVICE_TOKEN,
+      },
     }),
     MailerModule.forRoot({
       transport: {

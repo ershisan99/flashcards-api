@@ -35,10 +35,7 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
     let cover
 
     if (command.cover) {
-      const result = await this.fileUploadService.uploadFile(
-        command.cover.buffer,
-        command.cover.originalname
-      )
+      const result = await this.fileUploadService.uploadFile(command.cover)
 
       cover = result.fileUrl
     } else if (command.deck.cover === '') {

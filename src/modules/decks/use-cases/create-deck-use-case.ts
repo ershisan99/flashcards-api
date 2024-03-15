@@ -23,10 +23,7 @@ export class CreateDeckHandler implements ICommandHandler<CreateDeckCommand> {
     let cover
 
     if (command.cover) {
-      const result = await this.fileUploadService.uploadFile(
-        command.cover.buffer,
-        command.cover.originalname
-      )
+      const result = await this.fileUploadService.uploadFile(command.cover)
 
       cover = result.fileUrl
     }

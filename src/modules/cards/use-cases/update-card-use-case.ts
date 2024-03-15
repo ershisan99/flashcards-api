@@ -35,32 +35,20 @@ export class UpdateCardHandler implements ICommandHandler<UpdateCardCommand> {
     let questionImg, answerImg
 
     if (command.questionImg && command.answerImg) {
-      const addQuestionImagePromise = this.fileUploadService.uploadFile(
-        command.questionImg?.buffer,
-        command.questionImg?.originalname
-      )
-      const addAnswerImagePromise = this.fileUploadService.uploadFile(
-        command.answerImg?.buffer,
-        command.answerImg?.originalname
-      )
+      const addQuestionImagePromise = this.fileUploadService.uploadFile(command.questionImg)
+      const addAnswerImagePromise = this.fileUploadService.uploadFile(command.answerImg)
 
       const result = await Promise.all([addQuestionImagePromise, addAnswerImagePromise])
 
       questionImg = result[0].fileUrl
       answerImg = result[1].fileUrl
     } else if (command.answerImg) {
-      const addAnswerImagePromise = this.fileUploadService.uploadFile(
-        command.answerImg?.buffer,
-        command.answerImg?.originalname
-      )
+      const addAnswerImagePromise = this.fileUploadService.uploadFile(command.answerImg)
       const result = await addAnswerImagePromise
 
       answerImg = result.fileUrl
     } else if (command.questionImg) {
-      const addQuestionImagePromise = this.fileUploadService.uploadFile(
-        command.questionImg?.buffer,
-        command.questionImg?.originalname
-      )
+      const addQuestionImagePromise = this.fileUploadService.uploadFile(command.questionImg)
       const result = await addQuestionImagePromise
 
       questionImg = result.fileUrl

@@ -294,6 +294,21 @@ LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
     }
   }
 
+  public async deleteManyById(id: string[]) {
+    try {
+      return await this.prisma.deck.deleteMany({
+        where: {
+          id: {
+            in: id,
+          },
+        },
+      })
+    } catch (e) {
+      this.logger.error(e?.message)
+      throw new InternalServerErrorException(e?.message)
+    }
+  }
+
   public async deleteDeckById(id: string) {
     try {
       return await this.prisma.deck.delete({

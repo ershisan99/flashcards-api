@@ -25,10 +25,7 @@ export class UpdateUserHandler implements ICommandHandler<UpdateUserCommand> {
     let avatar: string | null
 
     if (command.avatar) {
-      const addAvatarImagePromise = this.fileUploadService.uploadFile(
-        command.avatar?.buffer,
-        command.avatar?.originalname
-      )
+      const addAvatarImagePromise = this.fileUploadService.uploadFile(command.avatar)
 
       const result = await addAvatarImagePromise
 

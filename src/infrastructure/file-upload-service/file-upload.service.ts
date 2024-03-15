@@ -1,46 +1,35 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
+import { CreateFileDto, FileType, StorageService } from '@it-incubator/storage-sdk'
 import { Injectable } from '@nestjs/common'
-import { v4 as uuid } from 'uuid'
 
 import { PrismaService } from '../../prisma.service'
 
 @Injectable()
 export class FileUploadService {
-  constructor(private prismaService: PrismaService) {}
+  constructor(
+    private prismaService: PrismaService,
+    private storageService: StorageService
+  ) {}
 
-  async uploadFile(dataBuffer: Buffer, fileName: string) {
-    const key = `${uuid()}-${fileName}`
-    const bucketName = process.env.AWS_BUCKET_NAME
-    const region = 'eu-central-1'
-    const s3 = new S3Client({
-      region,
-      credentials: {
-        accessKeyId: process.env.AWS_S3_ACCESS_KEY,
-        secretAccessKey: process.env.AWS_S3_SECRET_ACCESS_KEY,
-      },
-    })
-    const encodeFileName = encodeURIComponent(key)
+  private async uploadFileToStorageService(dto: CreateFileDto) {
+    return await this.storageService.create(dto).then(data => data.data)
+  }
 
-    const fileUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${encodeFileName}`
+  async uploadFile(file: CreateFileDto['file']) {
+    try {
+      const savedFile = await this.uploadFileToStorageService({
+        fileType: FileType.Image,
+        file,
+      })
 
-    const fileStorageInDB = {
-      fileName,
-      fileUrl,
-      key,
+      return this.prismaService.fileEntity.create({
+        data: {
+          fileName: savedFile.name,
+          fileUrl: savedFile.url,
+          key: savedFile.url,
+        },
+      })
+    } catch (e) {
+      console.log(e)
     }
-
-    const putCommand = new PutObjectCommand({
-      Bucket: bucketName,
-      Body: dataBuffer,
-      Key: key,
-      ContentDisposition: 'inline',
-      ContentType: `image/${fileName.split('.').at(-1)}`,
-    })
-
-    await s3.send(putCommand)
-
-    return this.prismaService.fileEntity.create({
-      data: fileStorageInDB,
-    })
   }
 }
