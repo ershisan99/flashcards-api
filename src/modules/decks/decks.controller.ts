@@ -93,25 +93,6 @@ export class DecksController {
     return this.commandBus.execute(new GetAllDecksV2Command({ ...finalQuery, userId: req.user.id }))
   }
 
-  @HttpCode(HttpStatus.PARTIAL_CONTENT)
-  @ApiOperation({ description: 'Retrieve paginated decks list.', summary: 'Paginated decks list' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
-  @UseGuards(JwtAuthGuard)
-  @Version('2')
-  @Get('empty')
-  async findAllEmpty(@Query() query: GetAllDecksDto, @Req() req) {
-    const result: PaginatedDecks = await this.commandBus.execute(
-      new GetAllDecksV2Command({
-        itemsPerPage: 5000,
-        minCardsCount: 0,
-        maxCardsCount: 0,
-        userId: req.user.id,
-      })
-    )
-
-    return this.decksRepository.deleteManyById(result.items.map(({ id }) => id))
-  }
-
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     description: 'Retrieve the minimum and maximum amount of cards in a deck.',
