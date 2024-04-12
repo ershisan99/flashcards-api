@@ -19,6 +19,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 import {
+  ApiBearerAuth,
   ApiConsumes,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -61,10 +62,7 @@ import {
 @ApiTags('Decks')
 @Controller('decks')
 export class DecksController {
-  constructor(
-    private commandBus: CommandBus,
-    private decksRepository: DecksRepository
-  ) {}
+  constructor(private commandBus: CommandBus) {}
 
   @HttpCode(HttpStatus.PARTIAL_CONTENT)
   @ApiOperation({
@@ -74,6 +72,7 @@ export class DecksController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get()
   findAllV1(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecksWithMaxCardsCount> {
     const finalQuery = Pagination.getPaginationData(query)
@@ -86,6 +85,7 @@ export class DecksController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @Version('2')
+  @ApiBearerAuth()
   @Get()
   findAllV2(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecks> {
     const finalQuery = Pagination.getPaginationData(query)
@@ -98,6 +98,7 @@ export class DecksController {
     description: 'Retrieve the minimum and maximum amount of cards in a deck.',
     summary: 'Minimum and maximum amount of cards in a deck',
   })
+  @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @Version('2')
@@ -110,6 +111,7 @@ export class DecksController {
   @ApiOperation({ description: 'Create a deck', summary: 'Create a deck' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(FileFieldsInterceptor([{ name: 'cover', maxCount: 1 }]))
   @Post()
   create(
@@ -131,6 +133,7 @@ export class DecksController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @UseGuards(JwtAuthGuard)
   @Get(':id')
+  @ApiBearerAuth()
   findOne(@Param('id') id: string): Promise<DeckWithAuthor> {
     return this.commandBus.execute(new GetDeckByIdCommand(id))
   }
@@ -142,6 +145,7 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileFieldsInterceptor([{ name: 'cover', maxCount: 1 }]))
   @Patch(':id')
+  @ApiBearerAuth()
   update(
     @Param('id') id: string,
     @UploadedFiles()
@@ -162,6 +166,7 @@ export class DecksController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Deck not found' })
   @Delete(':id')
+  @ApiBearerAuth()
   remove(@Param('id') id: string, @Req() req): Promise<Deck> {
     return this.commandBus.execute(new DeleteDeckByIdCommand(id, req.user.id))
   }
@@ -170,6 +175,7 @@ export class DecksController {
     description: 'Retrieve paginated cards in a deck',
     summary: 'Retrieve cards in a deck',
   })
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Get(':id/cards')
   findCardsInDeck(
@@ -187,6 +193,7 @@ export class DecksController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Deck not found' })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'questionImg', maxCount: 1 },
@@ -213,6 +220,7 @@ export class DecksController {
     description: 'Retrieve a random card in a deck. The cards priority is based on the grade',
     summary: 'Retrieve a random card',
   })
+  @ApiBearerAuth()
   @Get(':id/learn')
   findRandomCardInDeck(
     @Param('id') id: string,
@@ -224,6 +232,7 @@ export class DecksController {
     )
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Card not found' })

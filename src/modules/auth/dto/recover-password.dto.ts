@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsEmail, IsOptional, IsString } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
+@ApiSchema({ name: 'RecoverPasswordRequest' })
 export class RecoverPasswordDto {
   /** User's email address */
   @IsEmail()

@@ -1,16 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsBoolean, IsEmail, IsOptional, IsString, Length } from 'class-validator'
 
-export class RegistrationDto {
-  @Length(3, 30)
-  @IsOptional()
-  name?: string
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
 
+@ApiSchema({ name: 'RegistrationRequest' })
+export class RegistrationDto {
   @Length(3, 30)
   password: string
 
   @IsEmail()
   email: string
+
+  @Length(3, 30)
+  @IsOptional()
+  name?: string
 
   @ApiProperty({
     description: `HTML template to be sent in the email;\n ##name## will be replaced with the user's name; \n ##token## will be replaced with the password recovery token`,

@@ -15,6 +15,7 @@ import {
 import { CommandBus } from '@nestjs/cqrs'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 import {
+  ApiBearerAuth,
   ApiConsumes,
   ApiNoContentResponse,
   ApiNotFoundResponse,
@@ -38,6 +39,7 @@ export class CardsController {
   @ApiOperation({ summary: 'Get card by id', description: 'Get card by id' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Card not found' })
+  @ApiBearerAuth()
   @Get(':id')
   findOne(@Param('id') id: string): Promise<CardWithGrade> {
     return this.commandBus.execute(new GetDeckByIdCommand(id))
@@ -48,6 +50,7 @@ export class CardsController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @ApiNotFoundResponse({ description: 'Card not found' })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'questionImg', maxCount: 1 },
@@ -69,6 +72,7 @@ export class CardsController {
 
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete card by id', description: 'Delete card by id' })
   @ApiNoContentResponse({ description: 'New tokens generated successfully' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })

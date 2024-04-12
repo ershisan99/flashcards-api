@@ -1,5 +1,7 @@
 import { ApiProperty, OmitType } from '@nestjs/swagger'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
 export class User {
   id: string
   email: string
@@ -14,6 +16,8 @@ export class User {
 
 export class LoginResponse {
   accessToken: string
+  refreshToken: string
 }
 
+@ApiSchema({ name: 'User' })
 export class UserEntity extends OmitType(User, ['password']) {}

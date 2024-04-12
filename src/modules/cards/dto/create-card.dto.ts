@@ -1,5 +1,8 @@
 import { IsOptional, Length } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
+@ApiSchema({ name: 'CreateCardRequest' })
 export class CreateCardDto {
   @Length(3, 500)
   question: string

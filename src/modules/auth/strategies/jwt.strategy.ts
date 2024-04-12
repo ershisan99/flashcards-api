@@ -5,13 +5,11 @@ import { ExtractJwt, Strategy } from 'passport-jwt'
 
 import { AppSettings } from '../../../settings/app-settings'
 import { UsersService } from '../../users/services/users.service'
-import { AuthService } from '../auth.service'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     @Inject(AppSettings.name) private readonly appSettings: AppSettings,
-    private authService: AuthService,
     private userService: UsersService
   ) {
     super({

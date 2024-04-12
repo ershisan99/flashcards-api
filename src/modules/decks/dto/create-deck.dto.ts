@@ -2,6 +2,9 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger'
 import { Transform } from 'class-transformer'
 import { IsBoolean, IsOptional, Length } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
+@ApiSchema({ name: 'CreateDeckRequest' })
 export class CreateDeckDto {
   @Length(3, 30)
   name: string

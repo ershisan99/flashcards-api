@@ -19,6 +19,7 @@ import { CommandBus } from '@nestjs/cqrs'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiBody,
   ApiConsumes,
   ApiNoContentResponse,
@@ -63,6 +64,7 @@ export class AuthController {
   @ApiUnauthorizedResponse({ description: 'Not logged in' })
   @ApiBadRequestResponse({ description: 'User not found' })
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Get('me')
   async getUserData(@Request() req): Promise<UserEntity> {
     const userId = req.user.id
@@ -77,6 +79,7 @@ export class AuthController {
   @UseInterceptors(FileFieldsInterceptor([{ name: 'avatar', maxCount: 1 }]))
   @UseGuards(JwtAuthGuard)
   @Patch('me')
+  @ApiBearerAuth()
   async updateUserData(
     @Request() req,
     @UploadedFiles()
@@ -115,7 +118,7 @@ export class AuthController {
       secure: true,
     })
 
-    return { accessToken: req.user.data.accessToken }
+    return { accessToken: req.user.data.accessToken, refreshToken: req.user.data.refreshToken }
   }
 
   @ApiOperation({ description: 'Create a new user account', summary: 'Create a new user account' })
@@ -155,6 +158,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(JwtAuthGuard)
   @Post('logout')
+  @ApiBearerAuth()
   async logout(
     @Cookies('accessToken') accessToken: string,
     @Res({ passthrough: true }) res: ExpressResponse

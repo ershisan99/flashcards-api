@@ -1,5 +1,8 @@
 import { Length, Matches } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
+@ApiSchema({ name: 'CreateUserRequest' })
 export class CreateUserDto {
   @Length(3, 10)
   name: string

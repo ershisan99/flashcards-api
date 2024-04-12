@@ -2,8 +2,11 @@ import { PartialType } from '@nestjs/mapped-types'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsOptional, Length } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
 import { CreateCardDto } from './create-card.dto'
 
+@ApiSchema({ name: 'UpdateCardRequest' })
 export class UpdateCardDto extends PartialType(CreateCardDto) {
   @IsOptional()
   @Length(3, 500)

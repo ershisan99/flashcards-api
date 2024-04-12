@@ -2,10 +2,12 @@ import { PartialType } from '@nestjs/mapped-types'
 import { ApiProperty } from '@nestjs/swagger'
 import { IsBoolean } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
 import { IsOptionalOrEmptyString } from '../../../infrastructure/decorators'
 
 import { CreateDeckDto } from './create-deck.dto'
 
+@ApiSchema({ name: 'UpdateDeckRequest' })
 export class UpdateDeckDto extends PartialType(CreateDeckDto) {
   @IsOptionalOrEmptyString()
   name?: string

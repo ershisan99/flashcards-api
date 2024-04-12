@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger'
 import { IsOptional, IsString, IsUUID } from 'class-validator'
 
+import { ApiSchema } from '../../../infrastructure/common/helpers/api-schema'
+
+@ApiSchema({ name: 'ResendVerificationEmailRequest' })
 export class ResendVerificationEmailDto {
   @IsUUID()
   userId: string
