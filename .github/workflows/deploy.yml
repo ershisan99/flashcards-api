@@ -45,7 +45,7 @@ jobs:
             fi
             
             echo "Starting new container..."
-            docker run -d --name flashcards -p 80:3333 \
+            docker run -d --name flashcards -p 3333:3333 \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               -e DATABASE_URL_UNPOOLED="${{ secrets.DATABASE_URL_UNPOOLED }}" \
               -e ACCESS_JWT_SECRET_KEY="${{ secrets.ACCESS_JWT_SECRET_KEY }}" \
