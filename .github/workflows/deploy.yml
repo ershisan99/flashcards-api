@@ -32,7 +32,18 @@ jobs:
           username: root
           password: ${{ secrets.SSH_PASSWORD }}  # Using password instead of key
           script: |
+            echo "Pulling latest Docker image..."
             docker pull ershisan99/flashcards:latest
-            docker stop flashcards || true
-            docker rm flashcards || true
+            
+            echo "Checking if the container 'flashcards' exists..."
+            if [ $(docker ps -a -q -f name=^/flashcards$) ]; then
+              echo "Container exists. Stopping and removing..."
+              docker stop flashcards
+              docker rm flashcards
+            else
+              echo "No existing container to stop or remove."
+            fi
+            
+            echo "Starting new container..."
             docker run -d --name flashcards -p 80:3333 ershisan99/flashcards:latest
+
