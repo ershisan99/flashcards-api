@@ -30,7 +30,7 @@ jobs:
         with:
           host: ${{ secrets.DROPLET_IP }}
           username: root
-          password: ${{ secrets.SSH_PASSWORD }}  # Using password instead of key
+          password: ${{ secrets.SSH_PASSWORD }}
           script: |
             echo "Pulling latest Docker image..."
             docker pull ershisan99/flashcards:latest
@@ -45,5 +45,17 @@ jobs:
             fi
             
             echo "Starting new container..."
-            docker run -d --name flashcards -p 80:3333 ershisan99/flashcards:latest
-
+            docker run -d --name flashcards -p 80:3333 \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e DATABASE_URL_UNPOOLED="${{ secrets.DATABASE_URL_UNPOOLED }}" \
+              -e ACCESS_JWT_SECRET_KEY="${{ secrets.ACCESS_JWT_SECRET_KEY }}" \
+              -e REFRESH_JWT_SECRET_KEY="${{ secrets.REFRESH_JWT_SECRET_KEY }}" \
+              -e AWS_SES_SMTP_HOST="${{ secrets.AWS_SES_SMTP_HOST }}" \
+              -e AWS_SES_SMTP_PORT="${{ secrets.AWS_SES_SMTP_PORT }}" \
+              -e AWS_SES_SMTP_USER="${{ secrets.AWS_SES_SMTP_USER }}" \
+              -e AWS_SES_SMTP_PASS="${{ secrets.AWS_SES_SMTP_PASS }}" \
+              -e ADMIN_LOGIN="${{ secrets.ADMIN_LOGIN }}" \
+              -e ADMIN_PASSWORD="${{ secrets.ADMIN_PASSWORD }}" \
+              -e STORAGE_SERVICE_URL="${{ secrets.STORAGE_SERVICE_URL }}" \
+              -e STORAGE_SERVICE_TOKEN="${{ secrets.STORAGE_SERVICE_TOKEN }}" \
+              ershisan99/flashcards:latest
