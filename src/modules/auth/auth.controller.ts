@@ -76,10 +76,10 @@ export class AuthController {
   @ApiOperation({ description: 'Update current user data.', summary: 'Update user data' })
   @ApiUnauthorizedResponse({ description: 'Not logged in' })
   @ApiBadRequestResponse({ description: 'User not found' })
+  @ApiBearerAuth()
   @UseInterceptors(FileFieldsInterceptor([{ name: 'avatar', maxCount: 1 }]))
   @UseGuards(JwtAuthGuard)
   @Patch('me')
-  @ApiBearerAuth()
   async updateUserData(
     @Request() req,
     @UploadedFiles()
@@ -210,8 +210,15 @@ export class AuthController {
       sameSite: 'none',
       secure: true,
     })
+    res.send({
+      accessToken: newTokens.accessToken,
+      refreshToken: newTokens.refreshToken,
+    })
 
-    return { accessToken: newTokens.accessToken, refreshToken: newTokens.refreshToken }
+    return {
+      accessToken: newTokens.accessToken,
+      refreshToken: newTokens.refreshToken,
+    }
   }
 
   @ApiOperation({

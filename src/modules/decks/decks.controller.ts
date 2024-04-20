@@ -44,7 +44,6 @@ import {
   PaginatedDecksWithMaxCardsCount,
 } from './entities/deck.entity'
 import { MinMaxCards } from './entities/min-max-cards.entity'
-import { DecksRepository } from './infrastructure/decks.repository'
 import {
   CreateCardCommand,
   CreateDeckCommand,
