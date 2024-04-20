@@ -14,6 +14,7 @@ import {
   UploadedFiles,
   UseGuards,
   UseInterceptors,
+  Version,
 } from '@nestjs/common'
 import { CommandBus } from '@nestjs/cqrs'
 import { FileFieldsInterceptor } from '@nestjs/platform-express'
@@ -24,6 +25,7 @@ import {
   ApiConsumes,
   ApiNoContentResponse,
   ApiNotFoundResponse,
+  ApiOkResponse,
   ApiOperation,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -180,8 +182,9 @@ export class AuthController {
   }
 
   @ApiOperation({
-    description: 'Get new access token using refresh token',
-    summary: 'Get new access token using refresh token',
+    description: 'Deprecated, use v2',
+    summary: 'Deprecated, use v2',
+    deprecated: true,
   })
   @ApiUnauthorizedResponse({ description: 'Invalid or missing refreshToken' })
   @ApiNoContentResponse({ description: 'New tokens generated successfully' })
@@ -214,6 +217,26 @@ export class AuthController {
       accessToken: newTokens.accessToken,
       refreshToken: newTokens.refreshToken,
     })
+
+    return null
+  }
+
+  @ApiOperation({
+    description: 'Get new access token using refresh token',
+    summary: 'Get new access token using refresh token',
+  })
+  @ApiUnauthorizedResponse({ description: 'Invalid or missing refreshToken' })
+  @ApiOkResponse({ description: 'New tokens generated successfully' })
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtRefreshGuard)
+  @Post('refresh-token')
+  @Version('2')
+  async refreshTokenV2(@Request() req): Promise<LoginResponse> {
+    const userId = req.user.id
+    const shortAccessToken = req.headers['x-short-access-token'] === 'true'
+    const newTokens = await this.commandBus.execute(
+      new RefreshTokenCommand(userId, shortAccessToken)
+    )
 
     return {
       accessToken: newTokens.accessToken,
