@@ -191,7 +191,7 @@ export class AuthController {
   async refreshToken(
     @Request() req,
     @Response({ passthrough: true }) res: ExpressResponse
-  ): Promise<void> {
+  ): Promise<LoginResponse> {
     if (!req.cookies?.refreshToken) throw new UnauthorizedException()
     const userId = req.user.id
     const shortAccessToken = req.headers['x-short-access-token'] === 'true'
@@ -211,7 +211,7 @@ export class AuthController {
       secure: true,
     })
 
-    return null
+    return { accessToken: newTokens.accessToken, refreshToken: newTokens.refreshToken }
   }
 
   @ApiOperation({
