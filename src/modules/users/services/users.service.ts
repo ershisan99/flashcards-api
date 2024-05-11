@@ -21,6 +21,10 @@ export class UsersService {
     return await this.usersRepository.findUserById(id)
   }
 
+  async getUserByEmail(email: string) {
+    return await this.usersRepository.findUserByEmail(email)
+  }
+
   async deleteUserById(id: string): Promise<boolean> {
     return await this.usersRepository.deleteUserById(id)
   }

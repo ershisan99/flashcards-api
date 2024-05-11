@@ -25,12 +25,15 @@ export class RefreshTokenHandler implements ICommandHandler<RefreshTokenCommand>
       userId,
       date: new Date(),
     }
+
     const accessToken = jwt.sign(payload, accessSecretKey, {
       expiresIn: shortAccessToken ? '10s' : '10m',
     })
+
     const refreshToken = jwt.sign(payload, refreshSecretKey, {
       expiresIn: '30d',
     })
+
     const expiresIn = addDays(new Date(), 30)
 
     await this.authRepository.createRefreshToken(userId, refreshToken, expiresIn)

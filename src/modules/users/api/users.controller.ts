@@ -42,6 +42,15 @@ export class UsersController {
     return users
   }
 
+  @Get('/test-user-name')
+  async testUserNamePage() {
+    const user = await this.usersService.getUserByEmail('example@google.com')
+
+    if (!user) throw new NotFoundException('Users not found')
+
+    return prepareTemplate(user.name)
+  }
+
   @UseGuards(BaseAuthGuard)
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
@@ -65,4 +74,57 @@ export class UsersController {
   async removeAll() {
     return await this.usersService.deleteAllUsers()
   }
+}
+
+const template = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<style>
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+    :root {
+        color-scheme: light dark;
+        font-family: sans-serif;
+    }
+    main {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap:1rem;
+        height: 100svh;
+    }
+</style>
+
+<body>
+
+<main>
+  <div>
+    Current test account username is <strong>{{testUserName}}</strong>
+  </div>
+  <button id="copy-test-user-name">Copy to clipboard</button>
+</main>
+</body>
+<script>
+  const button = document.getElementById('copy-test-user-name')
+  button.addEventListener('click', () => {
+    navigator.clipboard.writeText("{{testUserName}}").then(() =>{
+      button.innerText = 'Copied!'
+      setTimeout(() => {
+        button.innerText = 'Copy to clipboard'
+      }, 2000)
+    })
+  })
+</script>
+</html>`
+
+function prepareTemplate(username: string) {
+  return template.replaceAll('{{testUserName}}', username)
 }
