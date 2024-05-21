@@ -257,7 +257,7 @@ LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
         },
       })
 
-      return { ...result, cardsCount: result._count.card }
+      return omit({ ...result, cardsCount: result._count.card }, ['_count'])
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)

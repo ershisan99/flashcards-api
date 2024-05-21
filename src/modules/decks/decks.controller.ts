@@ -37,12 +37,7 @@ import { Card, CardWithGrade, PaginatedCardsWithGrade } from '../cards/entities/
 
 import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
 import { GetRandomCardDto } from './dto/get-random-card.dto'
-import {
-  Deck,
-  DeckWithAuthor,
-  PaginatedDecks,
-  PaginatedDecksWithMaxCardsCount,
-} from './entities/deck.entity'
+import { Deck, PaginatedDecks, PaginatedDecksWithMaxCardsCount } from './entities/deck.entity'
 import { MinMaxCards } from './entities/min-max-cards.entity'
 import {
   CreateCardCommand,
@@ -120,7 +115,7 @@ export class DecksController {
       cover: Express.Multer.File[]
     },
     @Body() createDeckDto: CreateDeckDto
-  ): Promise<DeckWithAuthor> {
+  ): Promise<Deck> {
     const userId = req.user.id
 
     return this.commandBus.execute(
@@ -133,7 +128,7 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiBearerAuth()
-  findOne(@Param('id') id: string): Promise<DeckWithAuthor> {
+  findOne(@Param('id') id: string): Promise<Deck> {
     return this.commandBus.execute(new GetDeckByIdCommand(id))
   }
 
@@ -153,7 +148,7 @@ export class DecksController {
     },
     @Body() updateDeckDto: UpdateDeckDto,
     @Req() req
-  ): Promise<DeckWithAuthor> {
+  ): Promise<Deck> {
     return this.commandBus.execute(
       new UpdateDeckCommand(id, updateDeckDto, req.user.id, files?.cover?.[0])
     )
