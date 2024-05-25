@@ -7,6 +7,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   Request,
   Res,
   Response,
@@ -30,7 +31,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger'
-import { Response as ExpressResponse } from 'express'
+import { Request as ExpressRequest, Response as ExpressResponse } from 'express'
 
 import { Cookies } from '../../infrastructure/decorators'
 
@@ -53,8 +54,8 @@ import {
   ResendVerificationEmailCommand,
   ResetPasswordCommand,
   SendPasswordRecoveryEmailCommand,
-  VerifyEmailCommand,
   UpdateUserCommand,
+  VerifyEmailCommand,
 } from './use-cases'
 
 @ApiTags('Auth')
@@ -177,6 +178,29 @@ export class AuthController {
       sameSite: 'none',
       secure: true,
     })
+
+    return null
+  }
+
+  @Version('2')
+  @ApiOperation({ description: 'Sign current user out', summary: 'Sign current user out' })
+  @ApiUnauthorizedResponse({ description: 'Not logged in' })
+  @ApiNoContentResponse({ description: 'Logged out successfully' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(JwtAuthGuard)
+  @Post('logout')
+  @ApiBearerAuth()
+  async logout2(
+    @Cookies('accessToken') accessToken: string,
+    @Req() req: ExpressRequest
+  ): Promise<void> {
+    const authorization = req.headers.authorization
+
+    const token = authorization?.split(' ')[1]
+
+    if (!token) throw new UnauthorizedException()
+
+    await this.commandBus.execute(new LogoutCommand(token))
 
     return null
   }
