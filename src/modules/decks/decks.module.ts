@@ -21,6 +21,7 @@ import {
   AddDeckToFavoritesHandler,
   SaveGradeHandler,
   GetRandomCardInDeckHandler,
+  RemoveDeckFromFavoritesHandler,
 } from './use-cases'
 
 const commandHandlers = [
@@ -36,6 +37,7 @@ const commandHandlers = [
   CreateCardHandler,
   SaveGradeHandler,
   AddDeckToFavoritesHandler,
+  RemoveDeckFromFavoritesHandler,
 ]
 
 @Module({

@@ -50,6 +50,7 @@ import {
   GetDeckByIdCommand,
   GetMinMaxCardsUseCaseCommand,
   GetRandomCardInDeckCommand,
+  RemoveDeckFromFavoritesCommand,
   SaveGradeCommand,
   UpdateDeckCommand,
 } from './use-cases'
@@ -260,5 +261,19 @@ export class DecksController {
   })
   async addToFavorites(@Req() req, @Param('id') deckId: string): Promise<CardWithGrade> {
     return await this.commandBus.execute(new AddDeckToFavoritesCommand(req.user.id, deckId))
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({ description: 'Added to favorites' })
+  @Delete(':id/favorite')
+  @ApiOperation({
+    description: 'Add deck to favorites',
+    summary: 'Add deck to favorites',
+  })
+  async removeFromFavorites(@Req() req, @Param('id') deckId: string): Promise<CardWithGrade> {
+    return await this.commandBus.execute(new RemoveDeckFromFavoritesCommand(req.user.id, deckId))
   }
 }

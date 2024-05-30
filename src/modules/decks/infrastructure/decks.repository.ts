@@ -129,38 +129,42 @@ export class DecksRepository {
 
       // Construct the raw SQL query for fetching decks
       const query = `
-      SELECT 
-        d.*, 
-        COUNT(c.id) AS "cardsCount",
-        a."id" AS "authorId",
-        a."name" AS "authorName"
-      FROM flashcards.deck AS "d"
-      LEFT JOIN "flashcards"."card" AS c ON d."id" = c."deckId"
-      LEFT JOIN "flashcards"."user" AS a ON d."userId" = a.id
-      LEFT JOIN "flashcards"."favoriteDeck" AS fd ON d."id" = fd."deckId"
-      ${
-        conditions.length
-          ? `WHERE ${conditions
-              .map((_, index) => `${_.replace('?', `$${index + 1}`)}`)
-              .join(' AND ')}`
-          : ''
-      }
-      GROUP BY d."id", a."id"
-      ${
-        havingConditions.length
-          ? `HAVING ${havingConditions
-              .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
-              .join(' AND ')}`
-          : ''
-      }
-      ORDER BY ${orderField} ${orderDirection} 
-      LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
-        conditions.length + havingConditions.length + 2
-      };
-    `
+    SELECT 
+      d.*, 
+      COUNT(c.id) AS "cardsCount",
+      a."id" AS "authorId",
+      a."name" AS "authorName",
+      (fd."userId" IS NOT NULL) AS "isFavorite"
+    FROM flashcards.deck AS "d"
+    LEFT JOIN "flashcards"."card" AS c ON d."id" = c."deckId"
+    LEFT JOIN "flashcards"."user" AS a ON d."userId" = a.id
+    LEFT JOIN "flashcards"."favoriteDeck" AS fd ON d."id" = fd."deckId" AND fd."userId" = $1
+    ${
+      conditions.length
+        ? `WHERE ${conditions
+            .map((condition, index) => `${condition.replace('?', `$${index + 2}`)}`)
+            .join(' AND ')}`
+        : ''
+    }
+    GROUP BY d."id", a."id", fd."userId"
+    ${
+      havingConditions.length
+        ? `HAVING ${havingConditions
+            .map(
+              (condition, index) => `${condition.replace('?', `$${conditions.length + index + 2}`)}`
+            )
+            .join(' AND ')}`
+        : ''
+    }
+    ORDER BY ${orderField} ${orderDirection} 
+    LIMIT $${conditions.length + havingConditions.length + 2} OFFSET $${
+      conditions.length + havingConditions.length + 3
+    };
+  `
 
       // Parameters for fetching decks
       const deckQueryParams = [
+        userId,
         ...(name ? [name] : []),
         ...(authorId ? [authorId] : []),
         ...(userId ? [userId] : []),
@@ -177,38 +181,43 @@ export class DecksRepository {
           Deck & {
             authorId: string
             authorName: string
+            isFavorite: boolean
           }
         >
       >(query, ...deckQueryParams)
 
       // Construct the raw SQL query for total count
       const countQuery = `
-      SELECT COUNT(*) AS total
-      FROM (
-          SELECT d.id
-          FROM flashcards.deck AS d
-          LEFT JOIN flashcards.card AS c ON d.id = c."deckId"
-          LEFT JOIN flashcards."favoriteDeck" AS fd ON d."id" = fd."deckId"
-          ${
-            conditions.length
-              ? `WHERE ${conditions
-                  .map((_, index) => `${_.replace('?', `$${index + 1}`)}`)
-                  .join(' AND ')}`
-              : ''
-          }
-          GROUP BY d.id
-          ${
-            havingConditions.length
-              ? `HAVING ${havingConditions
-                  .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
-                  .join(' AND ')}`
-              : ''
-          }
-      ) AS subquery;
-    `
+    SELECT COUNT(*) AS total
+    FROM (
+        SELECT d.id
+        FROM flashcards.deck AS d
+        LEFT JOIN flashcards.card AS c ON d.id = c."deckId"
+        LEFT JOIN flashcards."favoriteDeck" AS fd ON d."id" = fd."deckId" AND fd."userId" = $1
+        ${
+          conditions.length
+            ? `WHERE ${conditions
+                .map((condition, index) => `${condition.replace('?', `$${index + 2}`)}`)
+                .join(' AND ')}`
+            : ''
+        }
+        GROUP BY d.id, fd."userId"
+        ${
+          havingConditions.length
+            ? `HAVING ${havingConditions
+                .map(
+                  (condition, index) =>
+                    `${condition.replace('?', `$${conditions.length + index + 2}`)}`
+                )
+                .join(' AND ')}`
+            : ''
+        }
+    ) AS subquery;
+  `
 
       // Parameters for total count query
       const countQueryParams = [
+        userId,
         ...(name ? [name] : []),
         ...(authorId ? [authorId] : []),
         ...(userId ? [userId] : []),
@@ -220,6 +229,7 @@ export class DecksRepository {
       // Execute the raw SQL query for total count
       const totalResult = await this.prisma.$queryRawUnsafe<any[]>(countQuery, ...countQueryParams)
       const total = Number(totalResult[0]?.total) ?? 1
+
       const modifiedDecks = decks.map(deck => {
         const cardsCount = deck.cardsCount
 
