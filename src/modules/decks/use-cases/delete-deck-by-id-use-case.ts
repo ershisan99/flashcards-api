@@ -15,7 +15,7 @@ export class DeleteDeckByIdHandler implements ICommandHandler<DeleteDeckByIdComm
   constructor(private readonly deckRepository: DecksRepository) {}
 
   async execute(command: DeleteDeckByIdCommand) {
-    const deck = await this.deckRepository.findDeckById(command.id)
+    const deck = await this.deckRepository.findDeckById(command.id, command.userId)
 
     if (!deck) throw new NotFoundException(`Deck with id ${command.id} not found`)
     if (deck.userId !== command.userId) {

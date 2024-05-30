@@ -56,7 +56,7 @@ export class GetAllCardsInDeckHandler implements ICommandHandler<GetAllCardsInDe
   }
 
   async execute(command: GetAllCardsInDeckCommand): Promise<PaginatedCards> {
-    const deck = await this.decksRepository.findDeckById(command.deckId)
+    const deck = await this.decksRepository.findDeckById(command.deckId, command.userId)
 
     if (!deck) throw new NotFoundException(`Deck with id ${command.deckId} not found`)
 

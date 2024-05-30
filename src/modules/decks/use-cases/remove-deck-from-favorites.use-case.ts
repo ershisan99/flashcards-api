@@ -17,7 +17,7 @@ export class RemoveDeckFromFavoritesHandler
   constructor(private readonly decksRepository: DecksRepository) {}
 
   async execute(command: RemoveDeckFromFavoritesCommand): Promise<void> {
-    const deck = await this.decksRepository.findDeckById(command.deckId)
+    const deck = await this.decksRepository.findDeckById(command.deckId, command.userId)
 
     if (!deck) {
       throw new NotFoundException(`Deck with id ${command.deckId} not found`)

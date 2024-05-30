@@ -37,7 +37,12 @@ import { Card, CardWithGrade, PaginatedCardsWithGrade } from '../cards/entities/
 
 import { CreateDeckDto, GetAllDecksDto, UpdateDeckDto } from './dto'
 import { GetRandomCardDto } from './dto/get-random-card.dto'
-import { Deck, PaginatedDecks, PaginatedDecksWithMaxCardsCount } from './entities/deck.entity'
+import {
+  Deck,
+  DeckWithFavorites,
+  PaginatedDecks,
+  PaginatedDecksWithMaxCardsCount,
+} from './entities/deck.entity'
 import { MinMaxCards } from './entities/min-max-cards.entity'
 import {
   AddDeckToFavoritesCommand,
@@ -130,8 +135,8 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiBearerAuth()
-  findOne(@Param('id') id: string): Promise<Deck> {
-    return this.commandBus.execute(new GetDeckByIdCommand(id))
+  findOne(@Param('id') id: string, @Req() req): Promise<DeckWithFavorites> {
+    return this.commandBus.execute(new GetDeckByIdCommand(id, req.user.id))
   }
 
   @ApiConsumes('multipart/form-data')
@@ -259,7 +264,7 @@ export class DecksController {
     description: 'Add deck to favorites',
     summary: 'Add deck to favorites',
   })
-  async addToFavorites(@Req() req, @Param('id') deckId: string): Promise<CardWithGrade> {
+  async addToFavorites(@Req() req, @Param('id') deckId: string): Promise<void> {
     return await this.commandBus.execute(new AddDeckToFavoritesCommand(req.user.id, deckId))
   }
 
@@ -267,13 +272,13 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiNoContentResponse({ description: 'Added to favorites' })
+  @ApiNoContentResponse({ description: 'Removed from favorites' })
   @Delete(':id/favorite')
   @ApiOperation({
-    description: 'Add deck to favorites',
-    summary: 'Add deck to favorites',
+    description: 'Remove deck from favorites',
+    summary: 'Remove deck from favorites',
   })
-  async removeFromFavorites(@Req() req, @Param('id') deckId: string): Promise<CardWithGrade> {
+  async removeFromFavorites(@Req() req, @Param('id') deckId: string): Promise<void> {
     return await this.commandBus.execute(new RemoveDeckFromFavoritesCommand(req.user.id, deckId))
   }
 }

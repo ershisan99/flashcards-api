@@ -23,7 +23,7 @@ export class UpdateDeckHandler implements ICommandHandler<UpdateDeckCommand> {
   ) {}
 
   async execute(command: UpdateDeckCommand): Promise<Deck> {
-    const deck = await this.deckRepository.findDeckById(command.deckId)
+    const deck = await this.deckRepository.findDeckById(command.deckId, command.userId)
 
     if (!deck) {
       throw new NotFoundException(`Deck with id ${command.deckId} not found`)

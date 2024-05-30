@@ -15,18 +15,26 @@ export class DeckWithAuthor extends Deck {
   author: DeckAuthor
 }
 
+export class DeckWithAuthorAndFavorites extends DeckWithAuthor {
+  isFavorite: boolean
+}
+
+export class DeckWithFavorites extends Deck {
+  isFavorite: boolean
+}
+
 export class DeckAuthor {
   id: string
   name: string
 }
 
 export class PaginatedDecksWithMaxCardsCount {
-  items: DeckWithAuthor[]
+  items: DeckWithAuthorAndFavorites[]
   pagination: Pagination
   maxCardsCount: number
 }
 
 export class PaginatedDecks {
-  items: DeckWithAuthor[]
+  items: DeckWithAuthorAndFavorites[]
   pagination: Pagination
 }

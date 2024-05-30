@@ -263,7 +263,7 @@ export class DecksRepository {
     }
   }
 
-  public async findDeckById(id: string): Promise<Deck> {
+  public async findDeckById(id: string, userId: string): Promise<any> {
     try {
       const result = await this.prisma.deck.findUnique({
         where: {
@@ -275,10 +275,20 @@ export class DecksRepository {
               card: true,
             },
           },
+          favoritedBy: {
+            where: {
+              userId,
+            },
+          },
         },
       })
 
-      return omit({ ...result, cardsCount: result._count.card }, ['_count'])
+      const isFavorite = result.favoritedBy.length > 0
+
+      return omit({ ...result, cardsCount: result._count.card, isFavorite }, [
+        '_count',
+        'favoritedBy',
+      ])
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
