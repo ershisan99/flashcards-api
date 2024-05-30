@@ -70,6 +70,7 @@ export class DecksRepository {
   async findAllDecks({
     name = undefined,
     authorId = undefined,
+    favoritedBy = undefined,
     userId,
     currentPage,
     itemsPerPage,
@@ -80,6 +81,9 @@ export class DecksRepository {
     if (!orderBy || orderBy === 'null') {
       orderBy = DecksOrderBy['updated-desc']
     }
+    if (authorId === '~caller') authorId = userId
+    if (favoritedBy === '~caller') favoritedBy = userId
+
     let orderField = 'd.updated' // default order field
     let orderDirection = 'DESC' // default order direction
 
@@ -115,6 +119,7 @@ export class DecksRepository {
       if (authorId) conditions.push(`d."userId" = ?`)
       if (userId)
         conditions.push(`(d."isPrivate" = FALSE OR (d."isPrivate" = TRUE AND d."userId" = ?))`)
+      if (favoritedBy) conditions.push(`fd."userId" = ?`)
 
       // Prepare the having clause for card count range
       const havingConditions = []
@@ -124,39 +129,42 @@ export class DecksRepository {
 
       // Construct the raw SQL query for fetching decks
       const query = `
-SELECT 
-  d.*, 
-  COUNT(c.id) AS "cardsCount",
-  a."id" AS "authorId",
-  a."name" AS "authorName"
-FROM flashcards.deck AS "d"
-LEFT JOIN "flashcards"."card" AS c ON d."id" = c."deckId"
-LEFT JOIN "flashcards"."user" AS a ON d."userId" = a.id
-${
-  conditions.length
-    ? `WHERE ${conditions.map((_, index) => `${_.replace('?', `$${index + 1}`)}`).join(' AND ')}`
-    : ''
-}
-GROUP BY d."id", a."id"
-${
-  havingConditions.length
-    ? `HAVING ${havingConditions
-        .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
-        .join(' AND ')}`
-    : ''
-}
-ORDER BY ${orderField} ${orderDirection} 
-LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
+      SELECT 
+        d.*, 
+        COUNT(c.id) AS "cardsCount",
+        a."id" AS "authorId",
+        a."name" AS "authorName"
+      FROM flashcards.deck AS "d"
+      LEFT JOIN "flashcards"."card" AS c ON d."id" = c."deckId"
+      LEFT JOIN "flashcards"."user" AS a ON d."userId" = a.id
+      LEFT JOIN "flashcards"."favoriteDeck" AS fd ON d."id" = fd."deckId"
+      ${
+        conditions.length
+          ? `WHERE ${conditions
+              .map((_, index) => `${_.replace('?', `$${index + 1}`)}`)
+              .join(' AND ')}`
+          : ''
+      }
+      GROUP BY d."id", a."id"
+      ${
+        havingConditions.length
+          ? `HAVING ${havingConditions
+              .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
+              .join(' AND ')}`
+          : ''
+      }
+      ORDER BY ${orderField} ${orderDirection} 
+      LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
         conditions.length + havingConditions.length + 2
       };
-
-      `
+    `
 
       // Parameters for fetching decks
       const deckQueryParams = [
         ...(name ? [name] : []),
         ...(authorId ? [authorId] : []),
         ...(userId ? [userId] : []),
+        ...(favoritedBy ? [favoritedBy] : []),
         ...(minCardsCount != null ? [minCardsCount] : []),
         ...(maxCardsCount != null ? [maxCardsCount] : []),
         itemsPerPage,
@@ -172,36 +180,39 @@ LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
           }
         >
       >(query, ...deckQueryParams)
+
       // Construct the raw SQL query for total count
       const countQuery = `
-    SELECT COUNT(*) AS total
-    FROM (
-        SELECT d.id
-        FROM flashcards.deck AS d
-        LEFT JOIN flashcards.card AS c ON d.id = c."deckId"
-       ${
-         conditions.length
-           ? `WHERE ${conditions
-               .map((_, index) => `${_.replace('?', `$${index + 1}`)}`)
-               .join(' AND ')}`
-           : ''
-       }
-        GROUP BY d.id
-     ${
-       havingConditions.length
-         ? `HAVING ${havingConditions
-             .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
-             .join(' AND ')}`
-         : ''
-     }
-    ) AS subquery;
-`
+      SELECT COUNT(*) AS total
+      FROM (
+          SELECT d.id
+          FROM flashcards.deck AS d
+          LEFT JOIN flashcards.card AS c ON d.id = c."deckId"
+          LEFT JOIN flashcards."favoriteDeck" AS fd ON d."id" = fd."deckId"
+          ${
+            conditions.length
+              ? `WHERE ${conditions
+                  .map((_, index) => `${_.replace('?', `$${index + 1}`)}`)
+                  .join(' AND ')}`
+              : ''
+          }
+          GROUP BY d.id
+          ${
+            havingConditions.length
+              ? `HAVING ${havingConditions
+                  .map((_, index) => `${_.replace('?', `$${conditions.length + index + 1}`)}`)
+                  .join(' AND ')}`
+              : ''
+          }
+      ) AS subquery;
+    `
 
       // Parameters for total count query
       const countQueryParams = [
         ...(name ? [name] : []),
         ...(authorId ? [authorId] : []),
         ...(userId ? [userId] : []),
+        ...(favoritedBy ? [favoritedBy] : []),
         ...(minCardsCount != null ? [minCardsCount] : []),
         ...(maxCardsCount != null ? [maxCardsCount] : []),
       ]
@@ -317,6 +328,57 @@ LIMIT $${conditions.length + havingConditions.length + 1} OFFSET $${
         },
       })
     } catch (e) {
+      this.logger.error(e?.message)
+      throw new InternalServerErrorException(e?.message)
+    }
+  }
+
+  async findFavoritesByUserId(userId: string, deckId?: string): Promise<Array<string>> {
+    try {
+      const favorites = await this.prisma.favoriteDeck.findMany({
+        where: {
+          userId: userId,
+          ...{ deckId: deckId ? deckId : undefined },
+        },
+        select: {
+          deckId: true,
+        },
+      })
+
+      return favorites.map(favorite => favorite.deckId)
+    } catch (e) {
+      this.logger.error(e?.message)
+      throw new InternalServerErrorException(e?.message)
+    }
+  }
+
+  async addDeckToFavorites(userId: string, deckId: string): Promise<void> {
+    try {
+      await this.prisma.favoriteDeck.create({
+        data: {
+          userId: userId,
+          deckId: deckId,
+        },
+      })
+    } catch (e) {
+      // Handle the case where the favorite already exists or any other error
+      this.logger.error(e?.message)
+      throw new InternalServerErrorException(e?.message)
+    }
+  }
+
+  async removeDeckFromFavorites(userId: string, deckId: string): Promise<void> {
+    try {
+      await this.prisma.favoriteDeck.delete({
+        where: {
+          userId_deckId: {
+            userId: userId,
+            deckId: deckId,
+          },
+        },
+      })
+    } catch (e) {
+      // Handle the case where the favorite does not exist or any other error
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
     }

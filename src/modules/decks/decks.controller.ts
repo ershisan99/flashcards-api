@@ -40,6 +40,7 @@ import { GetRandomCardDto } from './dto/get-random-card.dto'
 import { Deck, PaginatedDecks, PaginatedDecksWithMaxCardsCount } from './entities/deck.entity'
 import { MinMaxCards } from './entities/min-max-cards.entity'
 import {
+  AddDeckToFavoritesCommand,
   CreateCardCommand,
   CreateDeckCommand,
   DeleteDeckByIdCommand,
@@ -245,5 +246,19 @@ export class DecksController {
     return await this.commandBus.execute(
       new SaveGradeCommand(req.user.id, { cardId: body.cardId, grade: body.grade })
     )
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse({ description: 'Added to favorites' })
+  @Post(':id/favorite')
+  @ApiOperation({
+    description: 'Add deck to favorites',
+    summary: 'Add deck to favorites',
+  })
+  async addToFavorites(@Req() req, @Param('id') deckId: string): Promise<CardWithGrade> {
+    return await this.commandBus.execute(new AddDeckToFavoritesCommand(req.user.id, deckId))
   }
 }

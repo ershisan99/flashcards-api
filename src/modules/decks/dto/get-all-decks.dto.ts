@@ -1,9 +1,10 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger'
 import { Type } from 'class-transformer'
-import { IsEnum, IsNumber, IsOptional, IsUUID } from 'class-validator'
+import { IsEnum, IsNumber, IsOptional } from 'class-validator'
 
 import { PaginationDto } from '../../../infrastructure/common/pagination/pagination.dto'
 import { IsOptionalOrEmptyString, IsOrderBy } from '../../../infrastructure/decorators'
+import { IsUUIDOrCaller } from '../../../infrastructure/decorators/is-uuid-or-caller'
 
 export enum DecksOrderBy {
   'null' = 'null',
@@ -34,10 +35,19 @@ export class GetAllDecksDto extends PaginationDto {
   @IsOptionalOrEmptyString()
   name?: string
 
-  /** Filter by deck authorId */
+  /** Filter by deck authorId
+   * If ~caller is passed, it will be replaced with the current user's id
+   */
   @IsOptionalOrEmptyString()
-  @IsUUID(4)
+  @IsUUIDOrCaller()
   authorId?: string
+
+  /** Decks favorited by user
+   * If ~caller is passed, it will be replaced with the current user's id
+   * */
+  @IsOptionalOrEmptyString()
+  @IsUUIDOrCaller()
+  favoritedBy?: string
 
   @ApiHideProperty()
   userId?: string

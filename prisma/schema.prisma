@@ -44,6 +44,10 @@ model user {
   revokedToken        revokedToken[]
   RefreshToken        refreshToken[]
   resetPassword       resetPassword?
+  favoriteDecks       favoriteDeck[]
+
+  @@index([email])
+  @@index([id])
 }
 
 model revokedToken {
@@ -113,6 +117,7 @@ model deck {
   author    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   card      card[]
   grades    grade[]
+  favoritedBy favoriteDeck[]
 
   @@index([userId])
 }
@@ -157,4 +162,16 @@ model fileEntity {
   key       String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model favoriteDeck {
+  id     String @id @default(cuid())
+  userId String
+  deckId String
+  user   user   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deck   deck   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, deckId])
+  @@index([userId])
+  @@index([deckId])
 }
