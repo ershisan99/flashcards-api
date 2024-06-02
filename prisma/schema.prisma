@@ -45,6 +45,7 @@ model user {
   RefreshToken        refreshToken[]
   resetPassword       resetPassword?
   favoriteDecks       favoriteDeck[]
+  attempts            cardAttempt[]
 
   @@index([email])
   @@index([id])
@@ -83,40 +84,41 @@ model resetPassword {
 }
 
 model card {
-  id            String   @id @default(cuid())
+  id            String        @id @default(cuid())
   deckId        String
   userId        String
-  question      String   @db.Text
-  answer        String   @db.Text
-  shots         Int      @default(0)
-  questionImg   String?  @db.VarChar(500)
-  answerImg     String?  @db.VarChar(500)
-  answerVideo   String?  @db.VarChar(500)
-  questionVideo String?  @db.VarChar(500)
+  question      String        @db.Text
+  answer        String        @db.Text
+  shots         Int           @default(0)
+  questionImg   String?       @db.VarChar(500)
+  answerImg     String?       @db.VarChar(500)
+  answerVideo   String?       @db.VarChar(500)
+  questionVideo String?       @db.VarChar(500)
   comments      String?
   type          String?
   moreId        String?
-  created       DateTime @default(now())
-  updated       DateTime @updatedAt
-  author        user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  decks         deck     @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  created       DateTime      @default(now())
+  updated       DateTime      @updatedAt
+  author        user          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  decks         deck          @relation(fields: [deckId], references: [id], onDelete: Cascade)
   grades        grade[]
+  attempts      cardAttempt[]
 
   @@index([userId])
   @@index([deckId])
 }
 
 model deck {
-  id        String   @id @default(cuid())
-  userId    String
-  name      String
-  isPrivate Boolean  @default(false)
-  cover     String?  @db.VarChar(500)
-  created   DateTime @default(now())
-  updated   DateTime @updatedAt
-  author    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card      card[]
-  grades    grade[]
+  id          String         @id @default(cuid())
+  userId      String
+  name        String
+  isPrivate   Boolean        @default(false)
+  cover       String?        @db.VarChar(500)
+  created     DateTime       @default(now())
+  updated     DateTime       @updatedAt
+  author      user           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card        card[]
+  grades      grade[]
   favoritedBy favoriteDeck[]
 
   @@index([userId])
@@ -174,4 +176,18 @@ model favoriteDeck {
   @@unique([userId, deckId])
   @@index([userId])
   @@index([deckId])
+}
+
+model cardAttempt {
+  id           String   @id @default(cuid())
+  userId       String
+  cardId       String
+  attemptCount Int      @default(1)
+  lastAttempt  DateTime @default(now())
+  user         user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card         card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, cardId])
+  @@index([userId])
+  @@index([cardId])
 }

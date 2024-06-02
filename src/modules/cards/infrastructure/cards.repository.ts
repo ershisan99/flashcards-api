@@ -97,13 +97,14 @@ export class CardsRepository {
         const whereClause = whereParts.join(' OR ')
 
         const sqlQuery = `
-  SELECT c.*, g.grade as "userGrade"
-  FROM flashcards.card AS c
-  LEFT JOIN flashcards.grade AS g ON c.id = g."cardId" AND g."userId" = $1
-  WHERE c."deckId" = $2 AND (${whereClause})
-  ORDER BY g."grade" ${direction === 'asc' ? 'ASC NULLS FIRST' : 'DESC NULLS LAST'}
-  LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
-`
+        SELECT c.*, g.grade as "userGrade", COALESCE(a."attemptCount", 0) as "totalAttempts"
+        FROM flashcards.card AS c
+        LEFT JOIN flashcards.grade AS g ON c.id = g."cardId" AND g."userId" = $1
+        LEFT JOIN flashcards.cardAttempt AS a ON c.id = a."cardId" AND a."userId" = $1
+        WHERE c."deckId" = $2 AND (${whereClause})
+        ORDER BY g."grade" ${direction === 'asc' ? 'ASC NULLS FIRST' : 'DESC NULLS LAST'}
+        LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
+      `
 
         // Add itemsPerPage and start to the queryParams
         queryParams.push(itemsPerPage, start)
@@ -113,13 +114,14 @@ export class CardsRepository {
           ...queryParams
         )) satisfies Array<any>
 
-        const cards: CardWithGrades[] = cardsRaw.map(({ userGrade, ...card }) => ({
+        const cards: CardWithGrades[] = cardsRaw.map(({ userGrade, totalAttempts, ...card }) => ({
           ...card,
           grades: [
             {
               grade: userGrade,
             },
           ],
+          attempts: totalAttempts,
         }))
 
         const totalCount = await this.prisma.card.count({ where })
@@ -143,13 +145,33 @@ export class CardsRepository {
                   grade: true,
                 },
               },
+              attempts: {
+                where: {
+                  userId,
+                },
+                select: {
+                  attemptCount: true,
+                },
+              },
             },
             skip: (currentPage - 1) * itemsPerPage,
             take: itemsPerPage,
           }),
         ])
 
-        return Pagination.transformPaginationData(result, { currentPage, itemsPerPage })
+        const [totalCount, cardsRaw] = result
+
+        const cards = cardsRaw.map(card => ({
+          ...card,
+          shots: card.attempts.reduce((acc, attempt) => acc + attempt.attemptCount, 0),
+        }))
+
+        console.log(cards)
+
+        return Pagination.transformPaginationData([totalCount, cards], {
+          currentPage,
+          itemsPerPage,
+        })
       }
     } catch (e) {
       this.logger.error(e?.message)
@@ -159,7 +181,7 @@ export class CardsRepository {
 
   async findCardsByDeckIdWithGrade(userId: string, deckId: string) {
     try {
-      return this.prisma.card.findMany({
+      const cards = await this.prisma.card.findMany({
         where: {
           deckId,
         },
@@ -169,8 +191,18 @@ export class CardsRepository {
               userId,
             },
           },
+          attempts: {
+            where: {
+              userId,
+            },
+          },
         },
       })
+
+      return cards.map(card => ({
+        ...card,
+        shots: card.attempts.reduce((acc, attempt) => acc + attempt.attemptCount, 0),
+      }))
     } catch (e) {
       this.logger.error(e?.message)
       throw new InternalServerErrorException(e?.message)
