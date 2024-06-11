@@ -14,7 +14,9 @@ import { ApiTags } from '@nestjs/swagger'
 
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { BaseAuthGuard } from '../../auth/guards'
+import { AdminGuard } from '../../auth/guards/admin.guard'
 import { CreateUserCommand } from '../../auth/use-cases'
+import { DecksRepository } from '../../decks/infrastructure/decks.repository'
 import { CreateUserDto } from '../dto/create-user.dto'
 import { UsersService } from '../services/users.service'
 
@@ -23,23 +25,54 @@ import { UsersService } from '../services/users.service'
 export class UsersController {
   constructor(
     private usersService: UsersService,
+    private decksRepository: DecksRepository,
     private commandBus: CommandBus
   ) {}
 
+  @UseGuards(AdminGuard)
   @Get()
   async findAll(@Query() query) {
     const { currentPage, itemsPerPage } = Pagination.getPaginationData(query)
 
-    const users = await this.usersService.getUsers(
-      currentPage,
-      itemsPerPage,
-      query.name,
-      query.email
-    )
+    const users = await this.usersService.getUsers({
+      page: currentPage,
+      pageSize: itemsPerPage,
+      name: query.name,
+      email: query.email,
+      orderBy: query.orderBy,
+      id: query.id,
+    })
 
     if (!users) throw new NotFoundException('Users not found')
 
     return users
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('empty-decks')
+  async getEmptyDecks() {
+    const decks = await this.decksRepository.findAllDecksForAdmin({})
+    const emptyDecks = decks.items.filter(deck => deck.cardsCount === 0)
+    const emptyDecksCount = emptyDecks.length
+    const privateEmptyDecks = emptyDecks.filter(deck => deck.isPrivate).length
+    const publicEmptyDecks = emptyDecksCount - privateEmptyDecks
+
+    return {
+      totalDecks: decks.items.length,
+      emptyDecksCount,
+      privateEmptyDecks,
+      publicEmptyDecks,
+    }
+  }
+
+  @UseGuards(AdminGuard)
+  @Delete('empty-decks')
+  async removeEmptyDecks() {
+    const decks = await this.decksRepository.findAllDecksForAdmin({})
+    const emptyDecks = decks.items.filter(deck => deck.cardsCount === 0)
+    const emptyDeckIds = emptyDecks.map(deck => deck.id)
+
+    return this.decksRepository.deleteManyById(emptyDeckIds)
   }
 
   @Get('/test-user-name')
@@ -63,7 +96,7 @@ export class UsersController {
     )
   }
 
-  @UseGuards(BaseAuthGuard)
+  @UseGuards(AdminGuard)
   @Delete(':id')
   async remove(@Param('id') id: string) {
     return await this.usersService.deleteUserById(id)

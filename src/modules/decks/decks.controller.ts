@@ -91,16 +91,22 @@ export class DecksController {
   findAllV2(@Query() query: GetAllDecksDto, @Req() req): Promise<PaginatedDecks> {
     const finalQuery = Pagination.getPaginationData(query)
 
-    return this.commandBus.execute(new GetAllDecksV2Command({ ...finalQuery, userId: req.user.id }))
+    return this.commandBus.execute(
+      new GetAllDecksV2Command({
+        ...finalQuery,
+        userId: req.user.id,
+        isAdmin: req.user.isAdmin,
+      })
+    )
   }
 
-  @HttpCode(HttpStatus.OK)
   @ApiOperation({
     description: 'Retrieve the minimum and maximum amount of cards in a deck.',
     summary: 'Minimum and maximum amount of cards in a deck',
   })
-  @ApiBearerAuth()
   @ApiUnauthorizedResponse({ description: 'Unauthorized' })
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @Version('2')
   @Get('min-max-cards')
@@ -169,7 +175,7 @@ export class DecksController {
   @Delete(':id')
   @ApiBearerAuth()
   remove(@Param('id') id: string, @Req() req): Promise<Deck> {
-    return this.commandBus.execute(new DeleteDeckByIdCommand(id, req.user.id))
+    return this.commandBus.execute(new DeleteDeckByIdCommand(id, req.user.id, req.user.isAdmin))
   }
 
   @ApiOperation({

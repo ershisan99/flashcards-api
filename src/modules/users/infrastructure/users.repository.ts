@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client'
 import { addHours } from 'date-fns'
 import { v4 as uuidv4 } from 'uuid'
 
+import { getOrderByObject } from '../../../infrastructure/common/helpers/get-order-by-object'
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
 import {
@@ -24,12 +25,26 @@ export class UsersRepository {
 
   private readonly logger = new Logger(UsersRepository.name)
 
-  async getUsers(
-    currentPage: number,
-    itemsPerPage: number,
-    searchNameTerm: string,
+  async getUsers({
+    currentPage,
+    itemsPerPage,
+    orderBy,
+    id,
+    searchNameTerm,
+    searchEmailTerm,
+  }: {
+    currentPage: number
+    itemsPerPage: number
+    searchNameTerm: string
     searchEmailTerm: string
-  ): Promise<EntityWithPaginationType<UserViewType>> {
+    orderBy?: string | null
+    id?: string
+  }): Promise<EntityWithPaginationType<UserViewType>> {
+    if (!orderBy || orderBy === 'null') {
+      orderBy = 'updated-desc'
+    }
+    const { key, direction } = getOrderByObject(orderBy) || {}
+
     try {
       const where: Prisma.userWhereInput = {
         name: {
@@ -38,6 +53,7 @@ export class UsersRepository {
         email: {
           contains: searchEmailTerm || undefined,
         },
+        ...(id && { id }),
       }
       const res = await this.prisma.$transaction([
         this.prisma.user.count({ where }),
@@ -48,7 +64,12 @@ export class UsersRepository {
             name: true,
             email: true,
             isEmailVerified: true,
+            isAdmin: true,
+            avatar: true,
+            created: true,
+            updated: true,
           },
+          orderBy: { [key]: direction as Prisma.SortOrder },
           skip: (currentPage - 1) * itemsPerPage,
           take: itemsPerPage,
         }),
@@ -106,6 +127,7 @@ export class UsersRepository {
       throw new InternalServerErrorException(e)
     }
   }
+
   async deleteUserById(id: string): Promise<boolean> {
     try {
       const result = await this.prisma.user.delete({

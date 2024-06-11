@@ -13,8 +13,29 @@ export class UsersService {
 
   private logger = new Logger(UsersService.name)
 
-  async getUsers(page: number, pageSize: number, name: string, email: string) {
-    return await this.usersRepository.getUsers(page, pageSize, name, email)
+  async getUsers({
+    page,
+    pageSize,
+    name,
+    email,
+    orderBy,
+    id,
+  }: {
+    page: number
+    pageSize: number
+    name: string
+    email: string
+    orderBy?: string | null
+    id?: string
+  }) {
+    return await this.usersRepository.getUsers({
+      currentPage: page,
+      itemsPerPage: pageSize,
+      searchNameTerm: name,
+      searchEmailTerm: email,
+      orderBy,
+      id,
+    })
   }
 
   async getUserById(id: string) {

@@ -67,6 +67,201 @@ export class DecksRepository {
     }
   }
 
+  async findAllDecksForAdmin({
+    name = undefined,
+    authorId = undefined,
+    favoritedBy = undefined,
+    userId,
+    currentPage,
+    itemsPerPage,
+    minCardsCount,
+    maxCardsCount,
+    orderBy,
+  }: GetAllDecksDto): Promise<PaginatedDecks> {
+    if (!orderBy || orderBy === 'null') {
+      orderBy = DecksOrderBy['updated-desc']
+    }
+    if (authorId === '~caller') authorId = userId
+    if (favoritedBy === '~caller') favoritedBy = userId
+
+    let orderField = 'd.updated' // default order field
+    let orderDirection = 'DESC' // default order direction
+
+    if (orderBy) {
+      const orderByParts = orderBy.split('-')
+
+      if (orderByParts.length === 2) {
+        const field = orderByParts[0]
+        const direction = orderByParts[1].toUpperCase()
+
+        // Validate the field and direction
+        if (
+          ['cardsCount', 'updated', 'name', 'author.name', 'created'].includes(field) &&
+          ['ASC', 'DESC'].includes(direction)
+        ) {
+          if (field === 'cardsCount') {
+            orderField = '"cardsCount"'
+          } else if (field === 'author.name') {
+            orderField = 'a.name'
+          } else {
+            orderField = `d.${field}`
+          }
+
+          orderDirection = direction
+        }
+      }
+    }
+    try {
+      // Prepare the where clause conditions
+      const conditions = []
+
+      if (name) conditions.push(`d.name ILIKE ('%' || ? || '%')`)
+      if (authorId) conditions.push(`d."userId" = ?`)
+      if (userId) conditions.push(`(d."isPrivate" = FALSE OR (d."isPrivate" = TRUE))`)
+      if (favoritedBy) conditions.push(`fd."userId" = ?`)
+
+      // Prepare the having clause for card count range
+      const havingConditions = []
+
+      if (minCardsCount != null) havingConditions.push(`COUNT(c.id) >= ?`)
+      if (maxCardsCount != null) havingConditions.push(`COUNT(c.id) <= ?`)
+
+      // Construct the raw SQL query for fetching decks
+      const query = `
+    SELECT 
+      d.*, 
+      COUNT(c.id) AS "cardsCount",
+      a."id" AS "authorId",
+      a."name" AS "authorName",
+      (fd."userId" IS NOT NULL) AS "isFavorite"
+    FROM flashcards.deck AS "d"
+    LEFT JOIN "flashcards"."card" AS c ON d."id" = c."deckId"
+    LEFT JOIN "flashcards"."user" AS a ON d."userId" = a.id
+    LEFT JOIN "flashcards"."favoriteDeck" AS fd ON d."id" = fd."deckId" AND fd."userId" = $1
+    ${
+      conditions.length
+        ? `WHERE ${conditions
+            .map((condition, index) => `${condition.replace('?', `$${index + 2}`)}`)
+            .join(' AND ')}`
+        : ''
+    }
+    GROUP BY d."id", a."id", fd."userId"
+    ${
+      havingConditions.length
+        ? `HAVING ${havingConditions
+            .map(
+              (condition, index) => `${condition.replace('?', `$${conditions.length + index + 2}`)}`
+            )
+            .join(' AND ')}`
+        : ''
+    }
+    ORDER BY ${orderField} ${orderDirection} 
+    LIMIT $${conditions.length + havingConditions.length + 2} OFFSET $${
+      conditions.length + havingConditions.length + 3
+    };
+  `
+
+      // Parameters for fetching decks
+      const deckQueryParams = [
+        userId,
+        ...(name ? [name] : []),
+        ...(authorId ? [authorId] : []),
+        ...(userId ? [userId] : []),
+        ...(favoritedBy ? [favoritedBy] : []),
+        ...(minCardsCount != null ? [minCardsCount] : []),
+        ...(maxCardsCount != null ? [maxCardsCount] : []),
+        itemsPerPage,
+        (currentPage - 1) * itemsPerPage,
+      ]
+
+      // Execute the raw SQL query for fetching decks
+      const decks = await this.prisma.$queryRawUnsafe<
+        Array<
+          Deck & {
+            authorId: string
+            authorName: string
+            isFavorite: boolean
+          }
+        >
+      >(query, ...deckQueryParams)
+
+      // Construct the raw SQL query for total count
+      const countQuery = `
+    SELECT COUNT(*) AS total
+    FROM (
+        SELECT d.id
+        FROM flashcards.deck AS d
+        LEFT JOIN flashcards.card AS c ON d.id = c."deckId"
+        LEFT JOIN flashcards."favoriteDeck" AS fd ON d."id" = fd."deckId" AND fd."userId" = $1
+        ${
+          conditions.length
+            ? `WHERE ${conditions
+                .map((condition, index) => `${condition.replace('?', `$${index + 2}`)}`)
+                .join(' AND ')}`
+            : ''
+        }
+        GROUP BY d.id, fd."userId"
+        ${
+          havingConditions.length
+            ? `HAVING ${havingConditions
+                .map(
+                  (condition, index) =>
+                    `${condition.replace('?', `$${conditions.length + index + 2}`)}`
+                )
+                .join(' AND ')}`
+            : ''
+        }
+    ) AS subquery;
+  `
+
+      // Parameters for total count query
+      const countQueryParams = [
+        userId,
+        ...(name ? [name] : []),
+        ...(authorId ? [authorId] : []),
+        ...(userId ? [userId] : []),
+        ...(favoritedBy ? [favoritedBy] : []),
+        ...(minCardsCount != null ? [minCardsCount] : []),
+        ...(maxCardsCount != null ? [maxCardsCount] : []),
+      ]
+
+      // Execute the raw SQL query for total count
+      const totalResult = await this.prisma.$queryRawUnsafe<any[]>(countQuery, ...countQueryParams)
+      const total = Number(totalResult[0]?.total) ?? 1
+
+      const modifiedDecks = decks.map(deck => {
+        const cardsCount = deck.cardsCount
+
+        return omit(
+          {
+            ...deck,
+            cardsCount: typeof cardsCount === 'bigint' ? Number(cardsCount) : cardsCount,
+            isPrivate: !!deck.isPrivate,
+            author: {
+              id: deck.authorId,
+              name: deck.authorName,
+            },
+          },
+          ['authorId', 'authorName']
+        )
+      })
+
+      // Return the result with pagination data
+      return {
+        items: modifiedDecks,
+        pagination: {
+          totalItems: total,
+          currentPage,
+          itemsPerPage,
+          totalPages: Math.ceil(total / itemsPerPage),
+        },
+      }
+    } catch (e) {
+      this.logger.error(e?.message)
+      throw new InternalServerErrorException(e?.message)
+    }
+  }
+
   async findAllDecks({
     name = undefined,
     authorId = undefined,
