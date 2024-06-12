@@ -100,7 +100,7 @@ export class CardsRepository {
         SELECT c.*, g.grade as "userGrade", COALESCE(a."attemptCount", 0) as "totalAttempts"
         FROM flashcards.card AS c
         LEFT JOIN flashcards.grade AS g ON c.id = g."cardId" AND g."userId" = $1
-        LEFT JOIN flashcards.cardAttempt AS a ON c.id = a."cardId" AND a."userId" = $1
+        LEFT JOIN flashcards."cardAttempt" AS a ON c.id = a."cardId" AND a."userId" = $1
         WHERE c."deckId" = $2 AND (${whereClause})
         ORDER BY g."grade" ${direction === 'asc' ? 'ASC NULLS FIRST' : 'DESC NULLS LAST'}
         LIMIT $${queryParams.length + 1} OFFSET $${queryParams.length + 2}
