@@ -7,7 +7,7 @@ import {
 } from '../../../infrastructure/common/helpers/get-order-by-object'
 import { Pagination } from '../../../infrastructure/common/pagination/pagination.service'
 import { PrismaService } from '../../../prisma.service'
-import { CreateCardDto, GetAllCardsInDeckDto, UpdateCardDto } from '../dto'
+import { CardsOrderBy, CreateCardDto, GetAllCardsInDeckDto, UpdateCardDto } from '../dto'
 import { CardWithGrades, PaginatedCardsWithGrades } from '../entities/cards.entity'
 
 @Injectable()
@@ -52,7 +52,7 @@ export class CardsRepository {
     }: GetAllCardsInDeckDto
   ): Promise<PaginatedCardsWithGrades> {
     if (!orderBy || orderBy === 'null') {
-      orderBy = 'updated-desc'
+      orderBy = CardsOrderBy['updated-desc']
     }
     try {
       const where = {
