@@ -19,10 +19,12 @@ import {
   VerifyEmailHandler,
   UpdateUserHandler,
 } from './use-cases'
+import { DeleteCurrentUserAccountHandler } from './use-cases/delete-current-user-account-use-case'
 
 const commandHandlers = [
   CreateUserHandler,
   GetCurrentUserDataHandler,
+  DeleteCurrentUserAccountHandler,
   LogoutHandler,
   RefreshTokenHandler,
   ResendVerificationEmailHandler,

@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -57,6 +58,7 @@ import {
   UpdateUserCommand,
   VerifyEmailCommand,
 } from './use-cases'
+import { DeleteCurrentAccountCommand } from './use-cases/delete-current-user-account-use-case'
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -92,6 +94,23 @@ export class AuthController {
     const userId = req.user.id
 
     return await this.commandBus.execute(new UpdateUserCommand(userId, body, files?.avatar?.[0]))
+  }
+
+  @ApiOperation({
+    description:
+      'Delete current user account. All the user data will be deleted forever. This action can not be undone',
+    summary: 'Delete current user account',
+  })
+  @ApiUnauthorizedResponse({ description: 'Not logged in' })
+  @ApiBadRequestResponse({ description: 'User not found' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('me')
+  async deleteUserAccount(@Request() req): Promise<UserEntity> {
+    const userId = req.user.id
+
+    return await this.commandBus.execute(new DeleteCurrentAccountCommand(userId))
   }
 
   @ApiOperation({
