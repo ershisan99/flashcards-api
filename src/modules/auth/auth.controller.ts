@@ -107,7 +107,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete('me')
-  async deleteUserAccount(@Request() req): Promise<UserEntity> {
+  async deleteUserAccount(@Request() req): Promise<void> {
     const userId = req.user.id
 
     return await this.commandBus.execute(new DeleteCurrentAccountCommand(userId))
