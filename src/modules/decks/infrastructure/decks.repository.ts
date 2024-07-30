@@ -57,9 +57,61 @@ export class DecksRepository {
     }
   }
 
-  async findMinMaxCards(): Promise<{ min: number; max: number }> {
-    const result = await this.prisma
-      .$queryRaw`SELECT MAX(card_count) as "maxCardsCount", MIN(card_count) as "minCardsCount" FROM (SELECT deck.id, COUNT(card.id) as card_count FROM flashcards.deck LEFT JOIN "flashcards"."card" ON deck.id = card."deckId" GROUP BY deck.id) AS card_counts;`
+  async findMinMaxCards({
+    name,
+    authorId,
+    favoritedBy,
+    userId,
+  }: {
+    name?: string
+    authorId?: string
+    favoritedBy?: string
+    userId?: string
+  }): Promise<{ min: number; max: number }> {
+    const conditions = []
+
+    if (name) conditions.push(`deck.name ILIKE ('%' || ? || '%')`)
+    if (authorId) conditions.push(`deck."userId" = ?`)
+    if (userId)
+      conditions.push(
+        `(deck."isPrivate" = FALSE OR (deck."isPrivate" = TRUE AND deck."userId" = ?))`
+      )
+    if (favoritedBy) conditions.push(`fd."userId" = ?`)
+    const deckQueryParams = [
+      userId,
+      ...(name ? [name] : []),
+      ...(authorId ? [authorId] : []),
+      ...(userId ? [userId] : []),
+      ...(favoritedBy ? [favoritedBy] : []),
+    ]
+
+    console.log(conditions, deckQueryParams)
+    const query = `
+        SELECT MAX(card_count) as "maxCardsCount", 
+               MIN(card_count) as "minCardsCount" FROM (SELECT deck.id, COUNT(card.id) as card_count 
+                                                        FROM flashcards.deck
+                                                        LEFT JOIN flashcards."favoriteDeck" AS fd ON deck."id" = fd."deckId" AND fd."userId" = $1
+                                                        LEFT JOIN 
+                                                        "flashcards"."card" ON deck.id = card."deckId"
+                                                            ${
+                                                              conditions.length
+                                                                ? `WHERE ${conditions
+                                                                    .map(
+                                                                      (condition, index) =>
+                                                                        `${condition.replace(
+                                                                          '?',
+                                                                          `$${index + 2}`
+                                                                        )}`
+                                                                    )
+                                                                    .join(' AND ')}`
+                                                                : ''
+                                                            }
+                                                        GROUP BY deck.id
+                                                        ) AS card_counts;
+`
+
+    console.log(query)
+    const result = await this.prisma.$queryRawUnsafe(query, ...deckQueryParams)
 
     return {
       max: Number(result[0].maxCardsCount),

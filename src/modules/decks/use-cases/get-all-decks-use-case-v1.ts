@@ -14,7 +14,7 @@ export class GetAllDecksV1Handler implements ICommandHandler<GetAllDecksV1Comman
 
   async execute(command: GetAllDecksV1Command): Promise<PaginatedDecksWithMaxCardsCount> {
     const decks = await this.deckRepository.findAllDecks(command.params)
-    const minMax = await this.deckRepository.findMinMaxCards()
+    const minMax = await this.deckRepository.findMinMaxCards({})
 
     return { ...decks, maxCardsCount: minMax.max }
   }

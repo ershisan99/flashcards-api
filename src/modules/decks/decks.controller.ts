@@ -31,6 +31,7 @@ import {
 
 import { Pagination } from '../../infrastructure/common/pagination/pagination.service'
 import { SaveGradeDto } from '../auth/dto'
+import { GetMinMaxCardsDto } from '../auth/dto/min-max-cards.dto'
 import { JwtAuthGuard } from '../auth/guards'
 import { CreateCardDto, GetAllCardsInDeckDto } from '../cards/dto'
 import { Card, CardWithGrade, PaginatedCardsWithGrade } from '../cards/entities/cards.entity'
@@ -110,8 +111,13 @@ export class DecksController {
   @UseGuards(JwtAuthGuard)
   @Version('2')
   @Get('min-max-cards')
-  findMinMaxCards(): Promise<MinMaxCards> {
-    return this.commandBus.execute(new GetMinMaxCardsUseCaseCommand())
+  findMinMaxCards(@Query() query: GetMinMaxCardsDto, @Req() req): Promise<MinMaxCards> {
+    return this.commandBus.execute(
+      new GetMinMaxCardsUseCaseCommand({
+        ...query,
+        userId: req.user.id,
+      })
+    )
   }
 
   @ApiConsumes('multipart/form-data')
