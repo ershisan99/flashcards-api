@@ -1,2 +1,0 @@
-## TODO
-- [ ] Rate limit emails
