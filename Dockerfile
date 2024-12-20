@@ -1,5 +1,5 @@
 # Use the official Node.js LTS as a parent image
-FROM node:lts-alpine
+FROM node:20-alpine
 
 # Set the working directory in the Docker container
 WORKDIR /usr/src/app
