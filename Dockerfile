@@ -1,6 +1,6 @@
 # Use the official Node.js LTS as a parent image
 FROM node:20-alpine
-
+RUN apk add --no-cache openssl
 # Set the working directory in the Docker container
 WORKDIR /usr/src/app
 
