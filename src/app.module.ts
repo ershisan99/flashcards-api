@@ -13,6 +13,8 @@ import { JwtRefreshStrategy } from './modules/auth/strategies/jwt-refresh.strate
 import { JwtStrategy } from './modules/auth/strategies/jwt.strategy'
 import { CardsModule } from './modules/cards/cards.module'
 import { DecksModule } from './modules/decks/decks.module'
+import { DecksRepository } from './modules/decks/infrastructure/decks.repository'
+import { TaskRunner } from './modules/users/commands/remove-empty-decks.command'
 import { UsersModule } from './modules/users/users.module'
 import { PrismaModule } from './prisma.module'
 import { ConfigModule } from './settings/config.module'
@@ -48,7 +50,7 @@ import { ConfigModule } from './settings/config.module'
     }),
   ],
   controllers: [],
-  providers: [JwtStrategy, JwtRefreshStrategy, FileUploadService],
+  providers: [JwtStrategy, JwtRefreshStrategy, FileUploadService, DecksRepository, TaskRunner],
   exports: [CqrsModule, FileUploadService],
 })
 export class AppModule implements NestModule {
