@@ -1,11 +1,11 @@
 # Use the official Node.js LTS as a parent image
-FROM node:20-alpine
+FROM node:24.22.1-alpine
 RUN apk add --no-cache openssl
 # Set the working directory in the Docker container
 WORKDIR /usr/src/app
 
 # Install pnpm
-RUN npm install -g pnpm
+RUN npm install -g pnpm@9
 
 # Copy package.json, pnpm-lock.yaml (or package-lock.json if you use it) to the Docker container
 COPY package.json pnpm-lock.yaml ./
